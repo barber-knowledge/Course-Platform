@@ -107,7 +107,7 @@
                                     {% if current_user.is_admin %}
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item" href="/admin">
+                                        <a class="dropdown-item" href="{{ url_for('admin.index') }}">
                                             <i class="fas fa-cog me-1"></i> Admin Panel
                                         </a>
                                     </li>

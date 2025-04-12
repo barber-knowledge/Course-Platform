@@ -57,6 +57,7 @@ class Course(db.Model):
     enrollments = db.relationship('UserCourse', back_populates='course', lazy='dynamic')
     certificates = db.relationship('Certificate', back_populates='course', lazy='dynamic')
     payments = db.relationship('Payment', back_populates='course', lazy='dynamic')
+    pdfs = db.relationship('CoursePDF', back_populates='course', lazy='dynamic', cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Course {self.title}>'
@@ -112,18 +113,16 @@ class QuizQuestion(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False, index=True)
-    question = db.Column(db.Text, nullable=False)
-    option_a = db.Column(db.Text, nullable=False)
-    option_b = db.Column(db.Text, nullable=False)
-    option_c = db.Column(db.Text, nullable=True)
-    option_d = db.Column(db.Text, nullable=True)
-    correct_option = db.Column(db.Enum('A', 'B', 'C', 'D', name='correct_option_enum'), nullable=False)
+    question_text = db.Column(db.Text, nullable=False)
+    question_type = db.Column(db.String(20), default='multiple_choice')
+    points = db.Column(db.Integer, default=1)
     sequence_order = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     quiz = db.relationship('Quiz', back_populates='questions')
+    answers = db.relationship('QuizAnswer', back_populates='question', lazy='dynamic', cascade='all, delete-orphan')
     
     __table_args__ = (
         db.UniqueConstraint('quiz_id', 'sequence_order', name='_quiz_sequence_uc'),
@@ -131,6 +130,23 @@ class QuizQuestion(db.Model):
     
     def __repr__(self):
         return f'<QuizQuestion {self.id} ({self.quiz_id})>'
+
+class QuizAnswer(db.Model):
+    """Quiz Answer model for multiple choice and single choice questions"""
+    __tablename__ = 'quiz_answers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('quiz_questions.id', ondelete='CASCADE'), nullable=False, index=True)
+    answer_text = db.Column(db.Text, nullable=False)
+    is_correct = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    question = db.relationship('QuizQuestion', back_populates='answers')
+    
+    def __repr__(self):
+        return f'<QuizAnswer {self.id} ({self.question_id})>'
 
 class QuizAttempt(db.Model):
     """Quiz Attempt model to track student quiz submissions"""
@@ -245,24 +261,45 @@ class VideoProgress(db.Model):
     def __repr__(self):
         return f'<VideoProgress - User: {self.user_id}, Video: {self.video_id}>'
 
+class CoursePDF(db.Model):
+    """PDF document model for course materials"""
+    __tablename__ = 'course_pdfs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete='CASCADE'), nullable=False, index=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    pdf_path = db.Column(db.String(255), nullable=False)
+    sequence_order = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    course = db.relationship('Course', back_populates='pdfs')
+    
+    __table_args__ = (
+        db.UniqueConstraint('course_id', 'sequence_order', name='_course_pdf_sequence_uc'),
+    )
+    
+    def __repr__(self):
+        return f'<CoursePDF {self.title} ({self.course_id})>'
+
 class PlatformConfig(db.Model):
     """Platform configuration settings"""
     __tablename__ = 'platform_config'
     
     id = db.Column(db.Integer, primary_key=True)
-    platform_name = db.Column(db.String(100), nullable=False, default='Modular Course Platform')
-    primary_color = db.Column(db.String(7), nullable=False, default='#0d6efd')  # Bootstrap primary blue
-    secondary_color = db.Column(db.String(7), nullable=False, default='#6c757d')  # Bootstrap secondary
+    platform_name = db.Column(db.String(255), default="Modular Course Platform")
+    primary_color = db.Column(db.String(20), default="#4a6cf7")
+    secondary_color = db.Column(db.String(20), default="#6c757d")
     logo_path = db.Column(db.String(255), nullable=True)
     welcome_message = db.Column(db.Text, nullable=True)
     setup_complete = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Stripe configuration
     stripe_secret_key = db.Column(db.String(255), nullable=True)
     stripe_publishable_key = db.Column(db.String(255), nullable=True)
     stripe_enabled = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def __repr__(self):
         return f'<PlatformConfig {self.platform_name}>'

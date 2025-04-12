@@ -32,6 +32,7 @@ def create_app(config_class=Config):
     from .blueprints.quizzes.routes import bp as quizzes_bp
     from .blueprints.certificates.routes import bp as cert_bp
     from .blueprints.installer.routes import bp as installer_bp
+    from .blueprints.admin.routes import admin as admin_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -39,5 +40,6 @@ def create_app(config_class=Config):
     app.register_blueprint(quizzes_bp)
     app.register_blueprint(cert_bp)
     app.register_blueprint(installer_bp)
+    app.register_blueprint(admin_bp)
 
     return app

@@ -127,6 +127,21 @@ def platform_config():
         db.session.add(config)
         db.session.commit()
     
+    # Ensure upload directories exist
+    upload_dirs = [
+        os.path.join(current_app.static_folder, 'uploads'),
+        os.path.join(current_app.static_folder, 'uploads', 'logos'),
+        os.path.join(current_app.static_folder, 'uploads', 'pdfs'),
+        os.path.join(current_app.static_folder, 'uploads', 'courses')
+    ]
+    for directory in upload_dirs:
+        try:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+        except Exception as e:
+            flash(f'Failed to create upload directory: {str(e)}', 'danger')
+            current_app.logger.error(f'Failed to create directory {directory}: {str(e)}')
+    
     if request.method == 'POST':
         config.platform_name = request.form.get('platform_name')
         config.primary_color = request.form.get('primary_color')
@@ -135,23 +150,25 @@ def platform_config():
         
         # Handle logo upload if provided
         if 'logo' in request.files and request.files['logo'].filename:
-            logo_file = request.files['logo']
-            filename = secure_filename(f"{uuid.uuid4()}_{logo_file.filename}")
-            upload_folder = os.path.join(current_app.static_folder, 'uploads', 'logos')
-            
-            # Create folder if it doesn't exist
-            os.makedirs(upload_folder, exist_ok=True)
-            
-            # Save the file
-            logo_path = os.path.join(upload_folder, filename)
-            logo_file.save(logo_path)
-            
-            # Save the relative path in the database
-            config.logo_path = os.path.join('uploads', 'logos', filename)
+            try:
+                logo_file = request.files['logo']
+                filename = secure_filename(f"{uuid.uuid4()}_{logo_file.filename}")
+                upload_folder = os.path.join(current_app.static_folder, 'uploads', 'logos')
+                logo_path = os.path.join(upload_folder, filename)
+                logo_file.save(logo_path)
+                config.logo_path = os.path.join('uploads', 'logos', filename)
+            except Exception as e:
+                flash(f'Failed to upload logo: {str(e)}', 'danger')
+                current_app.logger.error(f'Logo upload failed: {str(e)}')
         
-        db.session.commit()
-        flash('Platform configuration saved successfully.', 'success')
-        return redirect(url_for('installer.stripe_config'))
+        try:
+            db.session.commit()
+            flash('Platform configuration saved successfully.', 'success')
+            return redirect(url_for('installer.stripe_config'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Failed to save configuration: {str(e)}', 'danger')
+            current_app.logger.error(f'Failed to save platform config: {str(e)}')
     
     return render_template('installer/platform_config.html', config=config)
 

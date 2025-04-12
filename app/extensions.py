@@ -33,6 +33,19 @@ migrate = Migrate()
 # Initialize Flask-WTF CSRF protection
 csrf = CSRFProtect()
 
+def allowed_file(filename, allowed_extensions):
+    """
+    Check if a filename has an allowed extension
+    
+    Args:
+        filename (str): The name of the file to check
+        allowed_extensions (list): List of allowed file extensions (without dots)
+    
+    Returns:
+        bool: True if the file has an allowed extension, False otherwise
+    """
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
 # Import models to ensure they're registered with SQLAlchemy
 # This import is at the bottom to avoid circular imports
 # from app import models
