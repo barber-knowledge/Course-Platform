@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}Welcome | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row py-5">
+        <div class="col-md-6 d-flex flex-column justify-content-center">
+            <h1 class="display-4 fw-bold mb-4">Expand Your Knowledge with Online Courses</h1>
+            <p class="lead mb-4">Learn at your own pace with our expert-led video courses, interactive quizzes, and earn certificates upon completion.</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{{ url_for('courses.index') }}" class="btn btn-primary btn-lg px-4">Browse Courses</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-4">Sign Up Free</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" class="img-fluid rounded-3 shadow" alt="Learning online" onerror="this.src='https://placehold.co/600x400?text=Online+Learning'">
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold">Why Choose Our Platform</h2>
+            <p class="lead">We've designed our learning experience with you in mind</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">HD Video Content</h3>
+                    <p class="card-text">Learn with high-quality videos that you can watch anytime and anywhere.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-certificate fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Earn Certificates</h3>
+                    <p class="card-text">Showcase your achievements with downloadable certificates upon course completion.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h3 class="card-title">Track Progress</h3>
+                    <p class="card-text">Monitor your learning journey and pick up right where you left off.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Courses Section -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold">Featured Courses</h2>
+            <p class="lead">Start learning with these popular courses</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Introduction to Programming</h5>
+                    <p class="card-text">Learn the basics of programming with this beginner-friendly course.</p>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-outline-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Digital Marketing Fundamentals</h5>
+                    <p class="card-text">Master the essential digital marketing skills and strategies.</p>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-outline-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Business Leadership</h5>
+                    <p class="card-text">Develop effective leadership skills for today's business environment.</p>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-outline-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row py-5">
+        <div class="col-12">
+            <div class="p-5 text-center bg-light rounded-3">
+                <h2 class="fw-bold mb-3">Ready to start learning?</h2>
+                <p class="lead mb-4">Join thousands of students who are already advancing their careers.</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Create Free Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

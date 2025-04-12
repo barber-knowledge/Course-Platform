@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block title %}About Us | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <h1 class="display-4 mb-4">About Our Learning Platform</h1>
+            <p class="lead">We are dedicated to providing high-quality educational content that helps professionals advance their careers and lifelong learners expand their knowledge.</p>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h2 class="mb-3">Our Mission</h2>
+            <p class="mb-4">Our mission is to create an accessible, engaging learning environment where anyone can acquire valuable skills and knowledge. We believe education should be available to everyone, regardless of their background or location.</p>
+            
+            <h2 class="mb-3">Our Vision</h2>
+            <p>We envision a world where continuous learning is part of everyone's lifestyle, empowering people to adapt to changing industries and pursue their passions with confidence.</p>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-3">Key Facts</h3>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex">
+                            <i class="fas fa-users fa-2x text-primary me-3"></i>
+                            <div>
+                                <h4>Growing Community</h4>
+                                <p class="mb-0">Join thousands of learners from around the world</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex">
+                            <i class="fas fa-graduation-cap fa-2x text-primary me-3"></i>
+                            <div>
+                                <h4>Expert Instructors</h4>
+                                <p class="mb-0">Learn from industry professionals with real-world experience</p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex">
+                            <i class="fas fa-book-open fa-2x text-primary me-3"></i>
+                            <div>
+                                <h4>Diverse Curriculum</h4>
+                                <p class="mb-0">Courses covering a wide range of subjects and skill levels</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">How It Works</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm text-center p-3">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold text-primary">1</span>
+                            </div>
+                            <h3>Sign Up</h3>
+                            <p class="card-text">Create a free account to browse our course catalog and access free preview content.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm text-center p-3">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold text-primary">2</span>
+                            </div>
+                            <h3>Enroll</h3>
+                            <p class="card-text">Choose courses that match your interests and goals, and get immediate access to all content.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm text-center p-3">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold text-primary">3</span>
+                            </div>
+                            <h3>Learn & Earn</h3>
+                            <p class="card-text">Complete courses at your own pace and earn certificates to showcase your achievement.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light p-5 rounded-3 text-center">
+                <h2 class="mb-3">Ready to start learning?</h2>
+                <p class="lead mb-4">Join our community of learners and start your educational journey today.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Sign Up Free</a>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-outline-secondary btn-lg px-4">Browse Courses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

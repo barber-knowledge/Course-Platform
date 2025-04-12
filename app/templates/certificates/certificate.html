@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block title %}Certificate | {{ certificate.course.title }} | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow mb-5">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-award fa-5x text-warning"></i>
+                </div>
+                
+                <h1 class="display-4 mb-4">Congratulations!</h1>
+                
+                <p class="lead mb-4">You have successfully completed</p>
+                <h2 class="mb-4">{{ certificate.course.title }}</h2>
+                
+                <p class="mb-5">
+                    This certificate was awarded to <strong>{{ certificate.user.name }}</strong> on 
+                    <strong>{{ certificate.issue_date.strftime('%B %d, %Y') }}</strong>
+                </p>
+                
+                <div class="certificate-details p-4 mb-5 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Certificate ID:</strong></p>
+                            <p>{{ certificate.certificate_id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Verification URL:</strong></p>
+                            <p><a href="{{ url_for('certificates.verify', certificate_id=certificate.certificate_id, _external=True) }}">
+                                Verify this certificate
+                            </a></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="certificate-actions">
+                    <a href="{{ url_for('certificates.download', course_id=certificate.course.id) }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-download me-2"></i> Download Certificate
+                    </a>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-outline-secondary btn-lg me-2" onclick="window.print();">
+                            <i class="fas fa-print me-2"></i> Print Certificate
+                        </button>
+                        
+                        <button class="btn btn-outline-primary btn-lg share-btn">
+                            <i class="fas fa-share-alt me-2"></i> Share Certificate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-5">
+            <h3>What's Next?</h3>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card mb-3 h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-graduation-cap fa-3x mb-3 text-primary"></i>
+                            <h5>Continue Learning</h5>
+                            <p>Explore more courses to further enhance your skills.</p>
+                            <a href="{{ url_for('courses.index') }}" class="btn btn-primary">Browse Courses</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-3 h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-graduate fa-3x mb-3 text-success"></i>
+                            <h5>Update Your Profile</h5>
+                            <p>Add this achievement to your professional profile.</p>
+                            <a href="{{ url_for('auth.profile') }}" class="btn btn-success">Go to Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share Your Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Share your achievement on social media:</p>
+                <div class="d-flex justify-content-center">
+                    <a href="#" class="btn btn-outline-primary mx-2" target="_blank">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary mx-2" target="_blank">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary mx-2" target="_blank">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <label for="certificateLink" class="form-label">Certificate Link:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="certificateLink" readonly
+                               value="{{ url_for('certificates.verify', certificate_id=certificate.certificate_id, _external=True) }}">
+                        <button class="btn btn-outline-secondary copy-link-btn" type="button">Copy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Share button functionality
+        const shareBtn = document.querySelector('.share-btn');
+        shareBtn.addEventListener('click', function() {
+            const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            shareModal.show();
+        });
+        
+        // Copy link functionality
+        const copyLinkBtn = document.querySelector('.copy-link-btn');
+        copyLinkBtn.addEventListener('click', function() {
+            const certificateLink = document.getElementById('certificateLink');
+            certificateLink.select();
+            document.execCommand('copy');
+            
+            copyLinkBtn.textContent = 'Copied!';
+            setTimeout(function() {
+                copyLinkBtn.textContent = 'Copy';
+            }, 2000);
+        });
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    @media print {
+        header, footer, .certificate-actions, .modal, .btn {
+            display: none !important;
+        }
+        
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

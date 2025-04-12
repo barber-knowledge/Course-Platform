@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+
+{% block title %}Setup Wizard | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Welcome to the Setup Wizard</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">This wizard will guide you through setting up your Modular Course Platform.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> 
+                        You're seeing this page because this is the first time you're running the application.
+                    </div>
+                    
+                    <h4 class="mt-4 mb-3">Setup Steps</h4>
+                    
+                    <div class="list-group mb-4">
+                        <div class="list-group-item {% if db_connected %}list-group-item-success{% else %}list-group-item-danger{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">1. Database Connection</h5>
+                                {% if db_connected %}
+                                    <span class="badge bg-success">Connected</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Error</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1">Checking connection to database: admin_@66.179.241.151</p>
+                            {% if not db_connected %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('installer.setup_database') }}" class="btn btn-sm btn-primary">
+                                        Try Setup Database
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="list-group-item {% if admin_exists %}list-group-item-success{% else %}list-group-item-warning{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">2. Admin Account</h5>
+                                {% if admin_exists %}
+                                    <span class="badge bg-success">Created</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1">Create an administrator account to manage the platform.</p>
+                            {% if not admin_exists and db_connected %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('installer.create_admin') }}" class="btn btn-sm btn-primary">
+                                        Create Admin Account
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="list-group-item {% if platform_config %}list-group-item-success{% else %}list-group-item-warning{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">3. Platform Configuration</h5>
+                                {% if platform_config %}
+                                    <span class="badge bg-success">Configured</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1">Configure platform name, colors, and branding.</p>
+                            {% if db_connected and admin_exists %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('installer.platform_config') }}" class="btn btn-sm btn-primary">
+                                        {% if platform_config %}Edit Configuration{% else %}Configure Platform{% endif %}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="list-group-item list-group-item-light">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">4. Stripe Integration</h5>
+                                <span class="badge bg-secondary">Optional</span>
+                            </div>
+                            <p class="mb-1">Configure Stripe payment processing.</p>
+                            {% if db_connected and admin_exists and platform_config %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('installer.stripe_config') }}" class="btn btn-sm btn-primary">
+                                        Configure Stripe
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        {% if db_connected and admin_exists and platform_config %}
+                            <a href="{{ url_for('installer.setup_complete') }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i> Complete Setup
+                            </a>
+                        {% else %}
+                            <p class="text-muted">Please complete all required steps above.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">System Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Database:</strong> MariaDB</p>
+                            <p><strong>Server:</strong> 66.179.241.151:3306</p>
+                            <p><strong>Database Name:</strong> admin_modularce</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                {% if db_connected %}
+                                    <span class="badge bg-success">Connected</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Not Connected</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Version:</strong> Flask {{ flask_version if flask_version else 'Unknown' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

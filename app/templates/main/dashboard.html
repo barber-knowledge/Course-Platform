@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="bg-light rounded-3 p-5 mb-4">
+            <div class="container-fluid">
+                <h1 class="display-5 fw-bold">Welcome, {{ current_user.name }}!</h1>
+                <p class="fs-4">Continue your learning journey or explore new courses.</p>
+                <a href="{{ url_for('courses.index') }}" class="btn btn-primary btn-lg">Explore Courses</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Your Enrolled Courses</h2>
+        <hr>
+    </div>
+</div>
+
+{% if enrolled_courses %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for enrollment in enrolled_courses %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">{{ enrollment.course.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Your progress</span>
+                                <span>{{ enrollment.progress_percent|default(0)|int }}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ enrollment.progress_percent|default(0) }}%" 
+                                     aria-valuenow="{{ enrollment.progress_percent|default(0)|int }}" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        
+                        <p class="card-text">{{ enrollment.course.description|truncate(100) }}</p>
+                        
+                        {% if enrollment.completed %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i> Completed on {{ enrollment.completion_date.strftime('%B %d, %Y') }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{{ url_for('courses.view', course_id=enrollment.course.id) }}" class="btn btn-primary">
+                            {% if enrollment.completed %}Review Course{% else %}Continue Learning{% endif %}
+                        </a>
+                        
+                        {% if enrollment.completed and enrollment.course.has_certificate %}
+                            <a href="{{ url_for('certificates.view', course_id=enrollment.course.id) }}" class="btn btn-outline-success">
+                                <i class="fas fa-award me-1"></i> View Certificate
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5 my-5">
+        <div class="mb-4">
+            <i class="fas fa-book-reader fa-4x text-muted"></i>
+        </div>
+        <h3>You haven't enrolled in any courses yet</h3>
+        <p class="lead">Explore our course catalog to start your learning journey.</p>
+        <a href="{{ url_for('courses.index') }}" class="btn btn-primary">Browse Courses</a>
+    </div>
+{% endif %}
+
+{% if recommended_courses %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2>Recommended Courses</h2>
+            <hr>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for course in recommended_courses %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text">{{ course.description|truncate(100) }}</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
