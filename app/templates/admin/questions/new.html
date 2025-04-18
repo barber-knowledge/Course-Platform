@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add Question to {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Add Question to "{{ quiz.title }}"</h1>
+    
+    <form method="POST" class="mt-4" id="questionForm">
+        <!-- Add CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+            <label for="question_text" class="form-label">Question Text</label>
+            <textarea class="form-control" id="question_text" name="question_text" rows="3" required></textarea>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="question_type" class="form-label">Question Type</label>
+                <select class="form-select" id="question_type" name="question_type" required>
+                    <option value="single_choice">Multiple Choice (Single Answer)</option>
+                </select>
+                <small class="form-text text-muted">Each question must have exactly one correct answer.</small>
+            </div>
+            
+            <div class="col-md-6">
+                <label for="points" class="form-label">Points</label>
+                <input type="number" class="form-control" id="points" name="points" value="1" min="1" required>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Answer Choices (Exactly 4 Required)</h5>
+            </div>
+            <div class="card-body">
+                <div id="answers-container">
+                    <!-- First answer option (default correct) -->
+                    <div class="answer-item mb-3">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="is_correct" value="0" checked>
+                            </div>
+                            <input type="text" class="form-control" name="answer_text[]" placeholder="Correct answer" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Three more answer options -->
+                    <div class="answer-item mb-3">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="is_correct" value="1">
+                            </div>
+                            <input type="text" class="form-control" name="answer_text[]" placeholder="Wrong answer 1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="answer-item mb-3">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="is_correct" value="2">
+                            </div>
+                            <input type="text" class="form-control" name="answer_text[]" placeholder="Wrong answer 2" required>
+                        </div>
+                    </div>
+                    
+                    <div class="answer-item mb-3">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="is_correct" value="3">
+                            </div>
+                            <input type="text" class="form-control" name="answer_text[]" placeholder="Wrong answer 3" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="form-text">
+                    <p>Select the radio button next to the correct answer. Each question must have exactly 4 answer choices with one correct answer.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary" id="saveButton">
+                <i class="fas fa-save"></i> Save Question
+            </button>
+            <a href="{{ url_for('admin.edit_quiz', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validate form submission - ensure exactly 4 answers
+        const questionForm = document.getElementById('questionForm');
+        const saveButton = document.getElementById('saveButton');
+        
+        questionForm.addEventListener('submit', function(e) {
+            const answerInputs = document.querySelectorAll('input[name="answer_text[]"]');
+            const filledAnswers = Array.from(answerInputs).filter(input => input.value.trim() !== '');
+            
+            if (filledAnswers.length !== 4) {
+                e.preventDefault();
+                alert('You must provide exactly 4 answer choices for each question.');
+                return false;
+            }
+            
+            const selectedRadio = document.querySelector('input[name="is_correct"]:checked');
+            if (!selectedRadio) {
+                e.preventDefault();
+                alert('You must select one correct answer.');
+                return false;
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}

@@ -48,6 +48,7 @@ class Course(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     is_active = db.Column(db.Boolean, default=True, index=True)
     has_certificate = db.Column(db.Boolean, default=False)
+    image_url = db.Column(db.String(255), nullable=True)  # Added image_url field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -70,9 +71,11 @@ class Video(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete='CASCADE'), nullable=False, index=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
-    video_path = db.Column(db.String(255), nullable=False)
+    # Store the relative path within static/uploads/videos
+    video_path = db.Column(db.String(255), nullable=False) 
     sequence_order = db.Column(db.Integer, nullable=False)
-    duration_seconds = db.Column(db.Integer, default=0)
+    duration_seconds = db.Column(db.Integer, default=0) # Changed from duration
+    is_free = db.Column(db.Boolean, default=False) # Added is_free field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -247,7 +250,6 @@ class VideoProgress(db.Model):
     seconds_watched = db.Column(db.Integer, default=0)
     is_completed = db.Column(db.Boolean, default=False)
     last_watched_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships

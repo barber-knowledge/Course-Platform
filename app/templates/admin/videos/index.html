@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Videos for "{{ course.title }}"</h1>
-        <a href="{{ url_for('admin.add_video', course_id=course.id) }}" class="btn btn-success">
+        <a href="{{ url_for('admin.new_video', course_id=course.id) }}" class="btn btn-success">
             <i class="fas fa-plus"></i> Add New Video
         </a>
     </div>
@@ -27,7 +27,7 @@
                                 <th style="width: 5%">#</th>
                                 <th style="width: 30%">Title</th>
                                 <th style="width: 35%">Description</th>
-                                <th style="width: 10%">Duration</th>
+                                <th style="width: 10%">Duration (s)</th>
                                 <th style="width: 10%">Free Preview</th>
                                 <th style="width: 10%">Actions</th>
                             </tr>
@@ -35,7 +35,7 @@
                         <tbody class="sortable" data-update-url="{{ url_for('admin.reorder_videos', course_id=course.id) }}">
                             {% for video in videos %}
                             <tr data-id="{{ video.id }}">
-                                <td>{{ video.sequence_order }}</td>
+                                <td><span class="handle" style="cursor: grab;"><i class="fas fa-grip-vertical me-2"></i></span>{{ video.sequence_order }}</td>
                                 <td>{{ video.title }}</td>
                                 <td>
                                     {% if video.description %}
@@ -44,7 +44,7 @@
                                         <span class="text-muted">No description</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ video.duration }} min</td>
+                                <td>{{ video.duration_seconds }} s</td>
                                 <td>
                                     {% if video.is_free %}
                                         <span class="badge bg-success">Free</span>
@@ -54,10 +54,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-light handle" title="Drag to reorder">
-                                            <i class="fas fa-grip-vertical"></i>
-                                        </button>
-                                        <a href="{{ url_for('admin.edit_video', course_id=course.id, video_id=video.id) }}" 
+                                        <a href="{{ url_for('admin.edit_video', video_id=video.id) }}" 
                                            class="btn btn-primary" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -79,7 +76,7 @@
             {% else %}
                 <div class="alert alert-info">
                     No videos have been added to this course yet. 
-                    <a href="{{ url_for('admin.add_video', course_id=course.id) }}">Add your first video</a>
+                    <a href="{{ url_for('admin.new_video', course_id=course.id) }}">Add your first video</a>
                 </div>
             {% endif %}
         </div>
@@ -101,6 +98,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger">Delete Video</button>
                 </form>
             </div>
@@ -119,8 +117,10 @@
                 const videoId = button.getAttribute('data-id');
                 const videoTitle = button.getAttribute('data-title');
                 
+                const deleteUrl = "{{ url_for('admin.delete_video', video_id=0) }}".replace('0', videoId);
+                
                 document.getElementById('videoTitle').textContent = videoTitle;
-                document.getElementById('deleteForm').action = "{{ url_for('admin.delete_video', course_id=course.id, video_id=0) }}".replace('0', videoId);
+                document.getElementById('deleteForm').action = deleteUrl;
             });
         }
         
@@ -151,11 +151,16 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Update the displayed order numbers
                                 items.forEach((item, index) => {
                                     const row = document.querySelector(`tr[data-id="${item.id}"]`);
                                     if (row) {
-                                        row.cells[0].textContent = index + 1;
+                                        const orderCell = row.cells[0];
+                                        const handleSpan = orderCell.querySelector('.handle');
+                                        orderCell.innerHTML = '';
+                                        if (handleSpan) {
+                                            orderCell.appendChild(handleSpan);
+                                        }
+                                        orderCell.appendChild(document.createTextNode(index + 1));
                                     }
                                 });
                             }

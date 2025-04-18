@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit PDF - {{ pdf.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Edit PDF Material</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
+        <!-- Add CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" 
+                   value="{{ pdf.title }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{ pdf.description }}</textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="sequence_order" class="form-label">Sequence Order</label>
+            <input type="number" class="form-control" id="sequence_order" name="sequence_order" 
+                   value="{{ pdf.sequence_order }}" min="1" required>
+            <div class="form-text">The order in which this PDF appears in the course materials</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="pdf_file" class="form-label">Replace PDF File (Optional)</label>
+            <input type="file" class="form-control" id="pdf_file" name="pdf_file" accept=".pdf">
+            <div class="form-text">Leave empty to keep the current PDF file</div>
+        </div>
+        
+        {% if pdf.pdf_path %}
+        <div class="mb-3">
+            <label class="form-label">Current PDF</label>
+            <div>
+                <a href="{{ url_for('static', filename=pdf.pdf_path[8:]) if pdf.pdf_path.startswith('/static/') else pdf.pdf_path }}" 
+                   class="btn btn-outline-primary" target="_blank">
+                    <i class="fas fa-file-pdf me-2"></i>View Current PDF
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update PDF
+            </button>
+            <a href="{{ url_for('admin.pdfs', course_id=pdf.course_id) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -9,6 +9,9 @@
     <h1>{% if course %}Edit Course{% else %}New Course{% endif %}</h1>
     
     <form method="POST" enctype="multipart/form-data" class="mt-4">
+        <!-- Add CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
         <div class="mb-3">
             <label for="title" class="form-label">Course Title</label>
             <input type="text" class="form-control" id="title" name="title" 

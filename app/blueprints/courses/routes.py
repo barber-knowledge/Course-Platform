@@ -3,6 +3,8 @@ Courses blueprint routes
 """
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
+from app.models import Course, UserCourse
+from app import db
 
 bp = Blueprint('courses', __name__, url_prefix='/courses')
 
@@ -11,8 +13,8 @@ def index():
     """
     List all available courses
     """
-    # Placeholder for course listing logic - for now using empty list
-    courses = []  # This will be replaced with actual database query
+    # Query all active courses from the database
+    courses = Course.query.filter_by(is_active=True).all()
     return render_template('courses/index.html', title='Available Courses', courses=courses)
 
 @bp.route('/<int:course_id>')

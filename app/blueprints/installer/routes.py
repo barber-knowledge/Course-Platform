@@ -42,8 +42,14 @@ def mark_setup_complete():
 @bp.before_request
 def check_setup():
     """Redirect to dashboard if setup is already completed, except for specific routes"""
-    if is_setup_complete() and request.endpoint != 'installer.setup_complete':
-        flash('Setup has already been completed.', 'info')
+    # Allow access to create_admin even if setup is complete
+    if is_setup_complete() and request.endpoint not in ['installer.setup_complete', 'installer.create_admin']: 
+        flash('Setup has already been completed. Admin users can be managed in the Admin Dashboard.', 'info') # Updated flash message
+        # Redirect to admin user management or dashboard if available, otherwise main index
+        if current_user.is_authenticated and current_user.is_admin:
+             # Assuming you have an admin route for user management, e.g., 'admin.users'
+             # return redirect(url_for('admin.users')) 
+             return redirect(url_for('admin.index')) # Or redirect to admin dashboard
         return redirect(url_for('main.index'))
 
 @bp.route('/')
@@ -81,7 +87,11 @@ def setup_database():
 
 @bp.route('/create-admin', methods=['GET', 'POST'])
 def create_admin():
-    """Create initial admin user"""
+    """Create initial or additional admin user""" # Updated docstring
+    # No need to check is_setup_complete() here anymore due to check_setup modification
+    
+    admin_exists = User.query.filter_by(is_admin=True).first() is not None
+
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
@@ -109,13 +119,18 @@ def create_admin():
         db.session.add(user)
         db.session.commit()
         
-        # Log in the new admin
-        login_user(user)
-        
-        flash('Admin user created successfully.', 'success')
-        return redirect(url_for('installer.platform_config'))
-    
-    return render_template('installer/create_admin.html')
+        # Modify flash message based on whether it's the first admin or an additional one
+        if not admin_exists:
+            flash('Initial admin user created successfully! You can now log in.', 'success')
+            # Log in the newly created admin automatically for the first time
+            login_user(user) 
+            return redirect(url_for('installer.platform_config')) # Redirect to next step if first admin
+        else:
+            flash('New admin user created successfully!', 'success')
+            # Redirect to login or admin user list after creating additional admins
+            return redirect(url_for('auth.login')) 
+
+    return render_template('installer/create_admin.html', admin_exists=admin_exists)
 
 @bp.route('/platform-config', methods=['GET', 'POST'])
 def platform_config():
