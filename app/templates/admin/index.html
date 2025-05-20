@@ -1,0 +1,197 @@
+{% extends 'layout.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Courses</h5>
+                    <p class="card-text display-4">{{ stats.courses }}</p>
+                    <a href="{{ url_for('admin.courses') }}" class="btn btn-light btn-sm">Manage Courses</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Users</h5>
+                    <p class="card-text display-4">{{ stats.users }}</p>
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-light btn-sm">Manage Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Enrollments</h5>
+                    <p class="card-text display-4">{{ stats.enrollments }}</p>
+                    <a href="{{ url_for('admin.enrollments') }}" class="btn btn-light btn-sm">View Enrollments</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Revenue</h5>
+                    <p class="card-text display-4">${{ stats.revenue }}</p>
+                    <a href="{{ url_for('admin.revenue') }}" class="btn btn-light btn-sm">View Revenue</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Admin Functions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Course Management</h5>
+                                    <p class="card-text">Create, edit, and manage your courses and their content.</p>
+                                    <a href="{{ url_for('admin.courses') }}" class="btn btn-primary">Manage Courses</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">User Management</h5>
+                                    <p class="card-text">View and manage user accounts and permissions.</p>
+                                    <a href="{{ url_for('admin.users') }}" class="btn btn-success">Manage Users</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Platform Settings</h5>
+                                    <p class="card-text">Configure platform settings, branding, and payment options.</p>
+                                    <a href="{{ url_for('admin.platform_settings') }}" class="btn btn-info">Platform Settings</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New row for Products and Popups -->
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Product Management</h5>
+                                    <p class="card-text">Create and manage promotional products to sell through videos.</p>
+                                    <a href="{{ url_for('products.admin_products') }}" class="btn btn-warning">Manage Products</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Popup Management</h5>
+                                    <p class="card-text">Create in-video popups to promote your products.</p>
+                                    <a href="{{ url_for('products.admin_popups') }}" class="btn btn-danger">Manage Popups</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Video Popup Assignment</h5>
+                                    <p class="card-text">Assign popups to specific videos for in-video promotions.</p>
+                                    <a href="{{ url_for('products.admin_videos_with_popups') }}" class="btn btn-secondary">Assign Popups to Videos</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Enrollments</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_enrollments %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Course</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enrollment in recent_enrollments %}
+                                    <tr>
+                                        <td>{{ enrollment.user.username }}</td>
+                                        <td>{{ enrollment.course.title }}</td>
+                                        <td>{{ enrollment.created_at.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent enrollments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Users</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_users %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Joined</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in recent_users %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent users.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

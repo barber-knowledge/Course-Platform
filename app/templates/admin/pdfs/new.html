@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add New PDF - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Add PDF Material to "{{ course.title }}"</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
+        <!-- Add CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="sequence_order" class="form-label">Sequence Order</label>
+            <input type="number" class="form-control" id="sequence_order" name="sequence_order" 
+                   value="1" min="1" required>
+            <div class="form-text">The order in which this PDF appears in the course materials</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="pdf_file" class="form-label">PDF File</label>
+            <input type="file" class="form-control" id="pdf_file" name="pdf_file" 
+                   accept=".pdf" required>
+            <div class="form-text">Please upload a PDF file (Max size: 10MB)</div>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save PDF
+            </button>
+            <a href="{{ url_for('admin.pdfs', course_id=course.id) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

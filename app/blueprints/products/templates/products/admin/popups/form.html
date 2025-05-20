@@ -1,0 +1,59 @@
+{% extends "admin/index.html" %}
+
+{% block title %}{{ 'Edit' if popup else 'New' }} Popup{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">{{ 'Edit' if popup else 'New' }} Popup</h4>
+            <a href="{{ url_for('products.admin_popups') }}" class="btn btn-secondary">Back to Popups</a>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="product_id" class="form-label">Product</label>
+                <select class="form-select" id="product_id" name="product_id" required>
+                    <option value="">Select a product</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if popup and popup.product_id == product.id %}selected{% endif %}>
+                        {{ product.title }} ({{ "$%.2f"|format(product.price) }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="popup_text" class="form-label">Popup Text</label>
+                <textarea class="form-control" id="popup_text" name="popup_text" rows="3">{{ popup.popup_text if popup else '' }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="popup_button_label" class="form-label">Button Label</label>
+                <input type="text" class="form-control" id="popup_button_label" name="popup_button_label" 
+                       value="{{ popup.popup_button_label if popup else 'Learn More' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="popup_trigger_seconds" class="form-label">Trigger Time (seconds)</label>
+                <input type="number" class="form-control" id="popup_trigger_seconds" name="popup_trigger_seconds" 
+                       value="{{ popup.popup_trigger_seconds if popup else 0 }}" min="0" required>
+                <small class="form-text text-muted">When to show the popup during video playback (in seconds)</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="popup_image" class="form-label">Popup Image (Optional)</label>
+                {% if popup and popup.popup_image %}
+                <div class="mb-2">
+                    <img src="{{ url_for('static', filename=popup.popup_image) }}" alt="Popup image" class="img-thumbnail" style="max-height: 200px;">
+                </div>
+                {% endif %}
+                <input type="file" class="form-control" id="popup_image" name="popup_image" accept="image/jpeg,image/png">
+                <small class="form-text text-muted">Recommended size: 600x400 pixels</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">{{ 'Update' if popup else 'Create' }} Popup</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

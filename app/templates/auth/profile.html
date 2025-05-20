@@ -1,0 +1,236 @@
+{% extends "layout.html" %}
+
+{% block title %}Profile | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img src="{{ url_for('static', filename='images/avatar-placeholder.png') }}" class="rounded-circle" alt="Profile Picture" width="120" height="120" onerror="this.src='https://ui-avatars.com/api/?name={{ current_user.name }}&size=120&background=random'">
+                    </div>
+                    <h5 class="card-title">{{ current_user.name }}</h5>
+                    <p class="card-text text-muted">{{ current_user.email }}</p>
+                    <div class="d-grid">
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
+                            Change Profile Picture
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="list-group shadow-sm">
+                <a href="#profileSettings" class="list-group-item list-group-item-action active" data-bs-toggle="list">Profile Settings</a>
+                <a href="#securitySettings" class="list-group-item list-group-item-action" data-bs-toggle="list">Security</a>
+                <a href="#notificationSettings" class="list-group-item list-group-item-action" data-bs-toggle="list">Notifications</a>
+                <a href="#billingInfo" class="list-group-item list-group-item-action" data-bs-toggle="list">Billing Information</a>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="profileSettings">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Profile Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('auth.profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="form_type" value="profile">
+                                
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Bio</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ current_user.bio }}</textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="securitySettings">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Security Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('auth.profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="form_type" value="password">
+                                
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8">
+                                    <div class="form-text">Password must be at least 8 characters long</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="notificationSettings">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Notification Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('auth.profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="form_type" value="notifications">
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="email_notifications" name="email_notifications" checked>
+                                    <label class="form-check-label" for="email_notifications">Email Notifications</label>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="course_updates" name="course_updates" checked>
+                                    <label class="form-check-label" for="course_updates">Course Updates</label>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="promotional_emails" name="promotional_emails">
+                                    <label class="form-check-label" for="promotional_emails">Promotional Emails</label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="billingInfo">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Billing Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Manage your payment methods and view your purchase history.</p>
+                            
+                            <h6 class="mb-3">Payment Methods</h6>
+                            <div class="list-group mb-4">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Credit Card •••• 1234</h6>
+                                        <small>Expires 12/25</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Default payment method</small>
+                                        <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary mb-4">Add Payment Method</button>
+                            
+                            <h6 class="mb-3">Purchase History</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Course</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-</td>
+                                            <td colspan="3">No purchase history found.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Picture Modal -->
+<div class="modal fade" id="changeProfilePictureModal" tabindex="-1" aria-labelledby="changeProfilePictureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeProfilePictureModalLabel">Change Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('auth.profile') }}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="form_type" value="profile_picture">
+                    
+                    <div class="mb-3">
+                        <label for="profile_picture" class="form-label">Upload Image</label>
+                        <input class="form-control" type="file" id="profile_picture" name="profile_picture" accept="image/*" required>
+                        <div class="form-text">Recommended size: 200x200 pixels. Maximum file size: 2MB.</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality already handled by Bootstrap
+        
+        // Form validation for password change
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
+        
+        if (newPassword && confirmPassword) {
+            confirmPassword.addEventListener('input', function() {
+                if (newPassword.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity("Passwords don't match");
+                } else {
+                    confirmPassword.setCustomValidity('');
+                }
+            });
+            
+            newPassword.addEventListener('input', function() {
+                if (newPassword.value !== confirmPassword.value && confirmPassword.value) {
+                    confirmPassword.setCustomValidity("Passwords don't match");
+                } else {
+                    confirmPassword.setCustomValidity('');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

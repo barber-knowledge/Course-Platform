@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block title %}Platform Configuration | Setup Wizard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Platform Configuration</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Configure your platform branding and appearance.</p>
+                    
+                    <form method="POST" action="{{ url_for('installer.platform_config') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <label for="platform_name" class="form-label">Platform Name</label>
+                            <input type="text" class="form-control" id="platform_name" name="platform_name" 
+                                   value="{{ config.platform_name }}" required>
+                            <div class="form-text">This name will appear in the browser title and throughout the site.</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="primary_color" class="form-label">Primary Color</label>
+                                <div class="input-group">
+                                    <span class="input-group-text colorPreview" id="primaryColorPreview"></span>
+                                    <input type="text" class="form-control" id="primary_color" name="primary_color" 
+                                           value="{{ config.primary_color }}" required pattern="^#([A-Fa-f0-9]{6})$">
+                                </div>
+                                <div class="form-text">Enter a valid hex color code (e.g., #0d6efd).</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="secondary_color" class="form-label">Secondary Color</label>
+                                <div class="input-group">
+                                    <span class="input-group-text colorPreview" id="secondaryColorPreview"></span>
+                                    <input type="text" class="form-control" id="secondary_color" name="secondary_color" 
+                                           value="{{ config.secondary_color }}" required pattern="^#([A-Fa-f0-9]{6})$">
+                                </div>
+                                <div class="form-text">Enter a valid hex color code (e.g., #6c757d).</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="logo" class="form-label">Platform Logo</label>
+                            <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                            <div class="form-text">Recommended size: 200x50 pixels. PNG with transparent background works best.</div>
+                            
+                            {% if config.logo_path %}
+                                <div class="mt-2">
+                                    <p>Current logo:</p>
+                                    <img src="{{ url_for('static', filename=config.logo_path) }}" alt="Platform Logo" 
+                                         class="img-thumbnail" style="max-height: 50px;">
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="welcome_message" class="form-label">Welcome Message</label>
+                            <textarea class="form-control" id="welcome_message" name="welcome_message" rows="4">{{ config.welcome_message }}</textarea>
+                            <div class="form-text">This message will be displayed on the dashboard for new users.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Save Configuration</button>
+                            <a href="{{ url_for('installer.index') }}" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .colorPreview {
+        width: 40px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const primaryColor = document.getElementById('primary_color');
+        const secondaryColor = document.getElementById('secondary_color');
+        const primaryPreview = document.getElementById('primaryColorPreview');
+        const secondaryPreview = document.getElementById('secondaryColorPreview');
+        
+        function updateColorPreviews() {
+            primaryPreview.style.backgroundColor = primaryColor.value;
+            secondaryPreview.style.backgroundColor = secondaryColor.value;
+        }
+        
+        primaryColor.addEventListener('input', updateColorPreviews);
+        secondaryColor.addEventListener('input', updateColorPreviews);
+        
+        // Initialize color previews
+        updateColorPreviews();
+    });
+</script>
+{% endblock %}

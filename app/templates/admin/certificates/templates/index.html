@@ -1,0 +1,126 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Certificate Templates{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">Certificate Templates</h1>
+        <a href="{{ url_for('admin.new_certificate_template') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Add Template
+        </a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-certificate me-1"></i>
+            Available Certificate Templates
+        </div>
+        <div class="card-body">
+            {% if templates %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="templatesTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Default</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for template in templates %}
+                                <tr>
+                                    <td>{{ template.name }}</td>
+                                    <td>{{ template.description|truncate(50) }}</td>
+                                    <td>
+                                        {% if template.is_default %}
+                                            <span class="badge bg-success">Default</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin.preview_certificate_template', template_id=template.id) }}" 
+                                               class="btn btn-sm btn-info" target="_blank">
+                                                <i class="fas fa-eye"></i> Preview
+                                            </a>
+                                            <a href="{{ url_for('admin.edit_certificate_template', template_id=template.id) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            {% if not template.is_default %}
+                                                <button type="button" class="btn btn-sm btn-danger" 
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ template.id }}">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade" id="deleteModal{{ template.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the certificate template "{{ template.name }}"?</p>
+                                                        <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                                                        <p>Any courses using this template will be reset to use the default template.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('admin.delete_certificate_template', template_id=template.id) }}" method="post">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-danger">Delete Template</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No certificate templates found. Create your first template by clicking the "Add Template" button above.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Managing Certificate Templates
+        </div>
+        <div class="card-body">
+            <p>Certificate templates allow you to create different styles of certificates that can be assigned to specific courses.</p>
+            <p>The default template is used for courses that don't have a specific template assigned.</p>
+            <p><strong>Tips:</strong></p>
+            <ul>
+                <li>Use the Preview button to see what your certificate design will look like</li>
+                <li>You can set any template as the default template</li>
+                <li>Assign templates to individual courses in the course settings</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize DataTable for better sorting and searching
+        $('#templatesTable').DataTable({
+            "order": [[0, 'asc']]
+        });
+    });
+</script>
+{% endblock %}

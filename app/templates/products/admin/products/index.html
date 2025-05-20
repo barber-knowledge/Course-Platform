@@ -1,0 +1,111 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Products{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Products</h1>
+        <a href="{{ url_for('products.admin_new_product') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+    
+    {% if products %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Type</th>
+                        <th>Popups</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>
+                                {% if product.image_path %}
+                                    <img src="{{ url_for('static', filename=product.image_path) }}" alt="{{ product.title }}" 
+                                         class="img-thumbnail" style="max-height: 40px; max-width: 60px;">
+                                {% else %}
+                                    <i class="fas fa-box text-secondary"></i>
+                                {% endif %}
+                                {{ product.title }}
+                            </td>
+                            <td>${{ "%.2f"|format(product.price) }}</td>
+                            <td>
+                                {% if product.is_free and product.has_external_url %}
+                                    <span class="badge bg-info">External Link</span>
+                                {% elif product.is_free %}
+                                    <span class="badge bg-success">Free</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Paid</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('products.admin_popups', product_id=product.id) }}" class="btn btn-sm btn-outline-primary">
+                                    Manage Popups
+                                </a>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('products.admin_edit_product', product_id=product.id) }}" class="btn btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ product.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ product.id }}">Confirm Delete</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete the product "{{ product.title }}"? This will also delete all associated popups.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="{{ url_for('products.admin_delete_product', product_id=product.id) }}" method="post">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No products have been created yet. 
+            <a href="{{ url_for('products.admin_new_product') }}">Create your first product</a> to start using the popup and upsell system.
+        </div>
+    {% endif %}
+    
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">About Products and Popups</h5>
+        </div>
+        <div class="card-body">
+            <p>Products can be used with video popups to upsell additional content or redirect users to external resources:</p>
+            <ul>
+                <li><strong>Paid Products</strong> - Users will be directed to Stripe checkout when clicking on popups</li>
+                <li><strong>Free Products with URL</strong> - Users will be redirected to the external URL</li>
+                <li><strong>Popups</strong> - Associate products with specific videos and control when they appear during playback</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

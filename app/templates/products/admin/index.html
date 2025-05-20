@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Products{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Products</h1>
+        <div>
+            <a href="{{ url_for('products.admin_popups') }}" class="btn btn-info me-2">
+                <i class="fas fa-comment-alt"></i> Manage Popups
+            </a>
+            <a href="{{ url_for('products.admin_videos_with_popups') }}" class="btn btn-info me-2">
+                <i class="fas fa-video"></i> Video Popup Assignments
+            </a>
+            <a href="{{ url_for('products.new_product') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+    
+    {% if products %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td style="width: 100px;">
+                                {% if product.image_path %}
+                                    <img src="{{ url_for('static', filename=product.image_path) }}" alt="{{ product.title }}" class="img-thumbnail" style="max-height: 60px;">
+                                {% else %}
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-image"></i> No image
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ product.title }}</td>
+                            <td>
+                                {% if product.is_free %}
+                                    <span class="badge bg-success">Free</span>
+                                {% else %}
+                                    ${{ "%.2f"|format(product.price) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if product.has_external_url %}
+                                    <span class="badge bg-info">External Link</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Paid Product</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('products.edit_product', product_id=product.id) }}" class="btn btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteProductModal{{ product.id }}" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteProductModal{{ product.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Delete</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete the product <strong>{{ product.title }}</strong>?</p>
+                                                <p class="text-danger">This action cannot be undone.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{{ url_for('products.delete_product', product_id=product.id) }}" method="POST" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No products found. Click the "Add New Product" button to create one.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

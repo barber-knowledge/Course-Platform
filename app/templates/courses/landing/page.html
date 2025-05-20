@@ -1,0 +1,411 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ course.meta_title or course.title }} | {{ config.platform_name }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- SEO Meta Tags -->
+<meta name="description" content="{{ course.meta_description }}">
+<meta property="og:title" content="{{ course.meta_title or course.title }}">
+<meta property="og:description" content="{{ course.meta_description }}">
+{% if course.banner_image %}
+<meta property="og:image" content="{{ url_for('static', filename='uploads/courses/' + course.banner_image) }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7" data-aos="fade-right">
+        <h1 class="display-4 fw-bold mb-4">{{ course.banner_text or course.title }}</h1>
+        <p class="lead mb-4">{{ course.short_description }}</p>
+        
+        <div class="d-flex gap-3 mb-4">
+          {% if current_user.is_authenticated %}
+            {% if enrolled %}
+              <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-primary">
+                <i class="fas fa-play-circle me-2"></i>Continue Learning
+              </a>
+            {% else %}
+              <a href="{{ url_for('courses.enroll', course_id=course.id) }}" class="btn btn-primary">
+                <i class="fas fa-graduation-cap me-2"></i>Enroll Now
+              </a>
+            {% endif %}
+          {% else %}
+            <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary">
+              <i class="fas fa-sign-in-alt me-2"></i>Login to Enroll
+            </a>
+            <a href="{{ url_for('auth.register', next=request.path) }}" class="btn btn-outline-primary">
+              <i class="fas fa-user-plus me-2"></i>Create Account
+            </a>
+          {% endif %}
+        </div>
+        
+        <div class="course-stats d-flex flex-wrap gap-4" data-aos="fade-up" data-aos-delay="100">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-clock text-primary me-2"></i>
+            <span>{{ course.duration or 'Self-paced' }}</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-film text-primary me-2"></i>
+            <span>{{ videos_count }} videos</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-file-pdf text-primary me-2"></i>
+            <span>{{ pdfs_count }} resources</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-certificate text-primary me-2"></i>
+            <span>Certificate on completion</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-5" data-aos="fade-left">
+        {% if course.banner_image %}
+          <img src="{{ url_for('static', filename='uploads/courses/' + course.banner_image) }}" 
+               alt="{{ course.title }}" class="img-fluid rounded-3 shadow">
+        {% elif course.thumbnail %}
+          <img src="{{ url_for('static', filename='uploads/courses/' + course.thumbnail) }}" 
+               alt="{{ course.title }}" class="img-fluid rounded-3 shadow">
+        {% else %}
+          <div class="bg-primary text-white rounded-3 p-5 text-center shadow">
+            <i class="fas fa-graduation-cap fa-5x mb-3"></i>
+            <h3 class="fw-bold">{{ course.title }}</h3>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Promo Video Section (if available) -->
+{% if course.promo_video %}
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10" data-aos="fade-up">
+        <div class="ratio ratio-16x9 rounded-3 shadow overflow-hidden">
+          <iframe src="{{ course.promo_video }}" 
+                  title="{{ course.title }} - Promo Video" 
+                  allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Course Content Overview -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">Course Content</h2>
+        <p class="lead">What you'll learn in this course</p>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-lg-8 mx-auto" data-aos="fade-up">
+        <div class="accordion" id="moduleAccordion">
+          {% for module in modules %}
+            <div class="accordion-item border-0 mb-3 shadow-sm">
+              <h3 class="accordion-header" id="module{{ module.id }}Heading">
+                <button class="accordion-button {% if not loop.first %}collapsed{% endif %} fw-bold" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#module{{ module.id }}Collapse" 
+                        aria-expanded="{{ 'true' if loop.first else 'false' }}" 
+                        aria-controls="module{{ module.id }}Collapse">
+                  Module {{ loop.index }}: {{ module.title }}
+                </button>
+              </h3>
+              <div id="module{{ module.id }}Collapse" 
+                   class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                   aria-labelledby="module{{ module.id }}Heading">
+                <div class="accordion-body">
+                  <p>{{ module.description }}</p>
+                  
+                  <ul class="list-group list-group-flush mt-3">
+                    {% for item in module_items.get(module.id, []) %}
+                      <li class="list-group-item bg-transparent d-flex align-items-center py-3">
+                        {% if item.type == 'video' %}
+                          <i class="fas fa-play-circle text-primary me-3"></i>
+                        {% elif item.type == 'pdf' %}
+                          <i class="fas fa-file-pdf text-primary me-3"></i>
+                        {% elif item.type == 'quiz' %}
+                          <i class="fas fa-question-circle text-primary me-3"></i>
+                        {% endif %}
+                        <span>{{ item.title }}</span>
+                        <span class="ms-auto text-muted small">
+                          {% if item.type == 'video' and item.duration %}
+                            {{ item.duration }}
+                          {% elif item.type == 'quiz' %}
+                            {{ item.questions_count }} questions
+                          {% endif %}
+                        </span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Learning Outcomes -->
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">What You'll Learn</h2>
+        <p class="lead">Key skills and knowledge you'll gain</p>
+      </div>
+    </div>
+    
+    <div class="row g-4">
+      {% if course.learning_outcomes %}
+        {% set outcomes = course.learning_outcomes|fromjson %}
+        {% for outcome in outcomes %}
+          <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                    <i class="fas fa-check text-primary"></i>
+                  </div>
+                  <h5 class="card-title mb-0">{{ outcome.title }}</h5>
+                </div>
+                <p class="card-text">{{ outcome.description }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-12 text-center">
+          <p>This course offers comprehensive learning outcomes to help you master the subject.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Instructor Section -->
+{% if instructor %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">Your Instructor</h2>
+        <p class="lead">Learn from industry experts</p>
+      </div>
+    </div>
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-aos="fade-up">
+        <div class="card border-0 shadow">
+          <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row">
+              <div class="text-center me-md-4 mb-4 mb-md-0">
+                {% if instructor.profile_image %}
+                  <img src="{{ url_for('static', filename='uploads/instructors/' + instructor.profile_image) }}" 
+                       class="rounded-circle" width="150" height="150" alt="{{ instructor.name }}">
+                {% else %}
+                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                       style="width: 150px; height: 150px;">
+                    <i class="fas fa-user fa-4x"></i>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div>
+                <h3 class="card-title fw-bold">{{ instructor.name }}</h3>
+                <p class="text-muted mb-4">{{ instructor.title }}</p>
+                <div class="instructor-bio mb-4">
+                  {{ instructor.bio|safe }}
+                </div>
+                
+                {% if instructor.social_links %}
+                  <div class="social-links">
+                    {% set links = instructor.social_links|fromjson %}
+                    {% for link in links %}
+                      <a href="{{ link.url }}" class="btn btn-outline-primary btn-sm me-2" target="_blank">
+                        <i class="fab fa-{{ link.platform }} me-1"></i>{{ link.platform|capitalize }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Testimonials -->
+{% if testimonials %}
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">What Students Say</h2>
+        <p class="lead">Feedback from our community</p>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-12" data-aos="fade-up">
+        <div class="testimonial-carousel">
+          {% for testimonial in testimonials %}
+            <div class="p-3">
+              <div class="card border-0 shadow h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    {% for i in range(testimonial.rating|int) %}
+                      <i class="fas fa-star text-warning me-1"></i>
+                    {% endfor %}
+                  </div>
+                  <p class="card-text mb-4">"{{ testimonial.text }}"</p>
+                  <div class="d-flex align-items-center">
+                    {% if testimonial.profile_image %}
+                      <img src="{{ testimonial.profile_image }}" class="rounded-circle me-3" width="40" height="40" alt="{{ testimonial.name }}">
+                    {% else %}
+                      <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user text-primary"></i>
+                      </div>
+                    {% endif %}
+                    <div>
+                      <h6 class="mb-0 fw-bold">{{ testimonial.name }}</h6>
+                      <small class="text-muted">{{ testimonial.title }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FAQ Section -->
+{% if course.faq %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">Frequently Asked Questions</h2>
+        <p class="lead">Everything you need to know about this course</p>
+      </div>
+    </div>
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-10" data-aos="fade-up">
+        <div class="accordion" id="faqAccordion">
+          {% set faqs = course.faq|fromjson %}
+          {% for faq in faqs %}
+            <div class="accordion-item border-0 mb-3 shadow-sm">
+              <h3 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button {% if not loop.first %}collapsed{% endif %} fw-bold" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapse{{ loop.index }}" 
+                        aria-expanded="{{ 'true' if loop.first else 'false' }}" 
+                        aria-controls="collapse{{ loop.index }}">
+                  {{ faq.question }}
+                </button>
+              </h3>
+              <div id="collapse{{ loop.index }}" 
+                   class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                   aria-labelledby="heading{{ loop.index }}" 
+                   data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  {{ faq.answer|safe }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8" data-aos="fade-up">
+        <h2 class="fw-bold mb-4">Ready to Start Learning?</h2>
+        <p class="lead mb-4">Join thousands of students who have already enrolled in this course.</p>
+        
+        {% if current_user.is_authenticated %}
+          {% if enrolled %}
+            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-light btn-lg">
+              <i class="fas fa-play-circle me-2"></i>Continue Learning
+            </a>
+          {% else %}
+            <a href="{{ url_for('courses.enroll', course_id=course.id) }}" class="btn btn-light btn-lg">
+              <i class="fas fa-graduation-cap me-2"></i>Enroll Now
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-light btn-lg">
+            <i class="fas fa-sign-in-alt me-2"></i>Login to Enroll
+          </a>
+          <a href="{{ url_for('auth.register', next=request.path) }}" class="btn btn-outline-light btn-lg ms-3">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  // Initialize AOS animations
+  AOS.init({
+    duration: 800,
+    once: true
+  });
+  
+  // Initialize testimonial carousel if it exists
+  document.addEventListener('DOMContentLoaded', function() {
+    const testimonialCarousel = document.querySelector('.testimonial-carousel');
+    if (testimonialCarousel) {
+      new Splide('.testimonial-carousel', {
+        perPage: 3,
+        gap: '1rem',
+        breakpoints: {
+          992: {
+            perPage: 2,
+          },
+          768: {
+            perPage: 1,
+          }
+        },
+        arrows: true,
+        pagination: true,
+        autoplay: true,
+        interval: 5000,
+      }).mount();
+    }
+  });
+</script>
+{% endblock %}

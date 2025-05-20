@@ -1,0 +1,163 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .certificate-container {
+        max-width: 800px;
+        margin: 0 auto;
+        border: 15px solid #294767;
+        padding: 30px;
+        position: relative;
+        background-color: #fff;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    
+    .certificate-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .certificate-title {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 36px;
+        color: #294767;
+        margin-bottom: 10px;
+    }
+    
+    .certificate-subtitle {
+        font-size: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .recipient-name {
+        font-family: 'Brush Script MT', cursive;
+        font-size: 40px;
+        text-align: center;
+        margin: 30px 0;
+        color: #294767;
+    }
+    
+    .certificate-text {
+        font-size: 18px;
+        line-height: 1.6;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .signature-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 60px;
+    }
+    
+    .signature-box {
+        text-align: center;
+        width: 200px;
+    }
+    
+    .signature-line {
+        border-top: 1px solid #000;
+        margin-bottom: 5px;
+    }
+    
+    .certificate-footer {
+        margin-top: 50px;
+        text-align: center;
+        font-size: 12px;
+    }
+    
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        color: rgba(200, 200, 200, 0.3);
+        font-size: 100px;
+        z-index: -1;
+        pointer-events: none;
+    }
+    
+    .verification-link {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    @media print {
+        .no-print {
+            display: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .certificate-container {
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="action-buttons no-print">
+        <a href="{{ url_for('certificates.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Certificates
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Print Certificate
+        </button>
+        <a href="{{ url_for('certificates.download', course_id=certificate.course_id) }}" class="btn btn-success">
+            <i class="fas fa-download"></i> Download PDF
+        </a>
+    </div>
+    
+    <div class="certificate-container">
+        <div class="watermark">CERTIFIED</div>
+        
+        <div class="certificate-header">
+            <div class="certificate-title">CERTIFICATE OF COMPLETION</div>
+            <div class="certificate-subtitle">This is to certify that</div>
+        </div>
+        
+        <div class="recipient-name">{{ certificate.user.name }}</div>
+        
+        <div class="certificate-text">
+            has successfully completed the online course<br>
+            <strong>{{ certificate.course.title }}</strong><br>
+            with all requirements fulfilled on {{ certificate.issue_date.strftime('%B %d, %Y') }}
+        </div>
+        
+        <div class="signature-container">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div>Course Instructor</div>
+            </div>
+            
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div>Administrator</div>
+            </div>
+        </div>
+        
+        <div class="certificate-footer">
+            <div>Certificate ID: {{ certificate.certificate_id }}</div>
+            <div>Issue Date: {{ certificate.issue_date.strftime('%B %d, %Y') }}</div>
+        </div>
+        
+        <div class="verification-link">
+            <small>Verify this certificate at: 
+                {{ url_for('certificates.verify', certificate_id=certificate.certificate_id, _external=True) }}</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

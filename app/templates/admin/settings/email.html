@@ -1,0 +1,227 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Email Settings | Admin Panel{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Email Settings</h1>
+        <div>
+            <button type="button" class="btn btn-success" id="testEmailBtn" data-bs-toggle="modal" data-bs-target="#testEmailModal">
+                <i class="fas fa-paper-plane me-2"></i>Send Test Email
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="card-title mb-0">SMTP Configuration</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.email_settings') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" id="smtp_enabled" name="smtp_enabled" 
+                                  {% if config.smtp_enabled %}checked{% endif %}>
+                            <label class="form-check-label" for="smtp_enabled">Enable Email Sending</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="smtp-settings" {% if not config.smtp_enabled %}class="opacity-50"{% endif %}>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="smtp_server" class="form-label">SMTP Server</label>
+                            <input type="text" class="form-control" id="smtp_server" name="smtp_server" 
+                                  value="{{ config.smtp_server or '' }}" placeholder="smtp.example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="smtp_port" class="form-label">SMTP Port</label>
+                            <input type="number" class="form-control" id="smtp_port" name="smtp_port" 
+                                  value="{{ config.smtp_port or 587 }}" placeholder="587">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="smtp_username" class="form-label">SMTP Username</label>
+                            <input type="text" class="form-control" id="smtp_username" name="smtp_username" 
+                                  value="{{ config.smtp_username or '' }}" placeholder="username@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="smtp_password" class="form-label">SMTP Password</label>
+                            <input type="password" class="form-control" id="smtp_password" name="smtp_password" 
+                                  placeholder="{% if config.smtp_password %}••••••••{% else %}Enter password{% endif %}">
+                            <div class="form-text">Leave blank to keep the current password</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="smtp_default_sender" class="form-label">Default From Email</label>
+                            <input type="email" class="form-control" id="smtp_default_sender" name="smtp_default_sender" 
+                                  value="{{ config.smtp_default_sender or '' }}" placeholder="noreply@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mt-4">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="smtp_use_tls" name="smtp_use_tls" 
+                                         {% if config.smtp_use_tls %}checked{% endif %}>
+                                    <label class="form-check-label" for="smtp_use_tls">Use TLS</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="smtp_use_ssl" name="smtp_use_ssl" 
+                                         {% if config.smtp_use_ssl %}checked{% endif %}>
+                                    <label class="form-check-label" for="smtp_use_ssl">Use SSL</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Email Configuration Help</h5>
+            <p>To send emails from your platform, you need to configure an SMTP server. Here are some common SMTP settings:</p>
+            <ul>
+                <li><strong>Gmail:</strong> SMTP Server: smtp.gmail.com, Port: 587, Use TLS: Yes</li>
+                <li><strong>Outlook/Office 365:</strong> SMTP Server: smtp.office365.com, Port: 587, Use TLS: Yes</li>
+                <li><strong>Amazon SES:</strong> SMTP Server: email-smtp.us-east-1.amazonaws.com, Port: 587, Use TLS: Yes</li>
+            </ul>
+            <p>For production use, we recommend using a dedicated email service like SendGrid, Mailgun, or Amazon SES.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Test Email Modal -->
+<div class="modal fade" id="testEmailModal" tabindex="-1" aria-labelledby="testEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testEmailModalLabel">Send Test Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Send a test email to verify your SMTP configuration is working correctly.</p>
+                <div class="mb-3">
+                    <label for="test_email" class="form-label">Recipient Email Address</label>
+                    <input type="email" class="form-control" id="test_email" placeholder="Enter your email">
+                </div>
+                <div id="testEmailResult"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="sendTestEmailBtn">
+                    <i class="fas fa-paper-plane me-2"></i>Send Test
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle SMTP settings based on enable/disable
+        const smtpEnabled = document.getElementById('smtp_enabled');
+        const smtpSettings = document.getElementById('smtp-settings');
+        
+        smtpEnabled.addEventListener('change', function() {
+            if (this.checked) {
+                smtpSettings.classList.remove('opacity-50');
+            } else {
+                smtpSettings.classList.add('opacity-50');
+            }
+        });
+        
+        // Handle TLS/SSL mutual exclusivity
+        const tlsCheckbox = document.getElementById('smtp_use_tls');
+        const sslCheckbox = document.getElementById('smtp_use_ssl');
+        
+        tlsCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                sslCheckbox.checked = false;
+            }
+        });
+        
+        sslCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                tlsCheckbox.checked = false;
+            }
+        });
+        
+        // Handle test email sending
+        const sendTestEmailBtn = document.getElementById('sendTestEmailBtn');
+        const testEmailInput = document.getElementById('test_email');
+        const testEmailResult = document.getElementById('testEmailResult');
+        
+        sendTestEmailBtn.addEventListener('click', function() {
+            const email = testEmailInput.value.trim();
+            
+            if (!email) {
+                testEmailResult.innerHTML = '<div class="alert alert-danger mt-3">Please enter an email address</div>';
+                return;
+            }
+            
+            // Set button to loading state
+            sendTestEmailBtn.disabled = true;
+            sendTestEmailBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            
+            // Clear previous results
+            testEmailResult.innerHTML = '';
+            
+            // Send the test email
+            fetch('{{ url_for('admin.test_email') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    testEmailResult.innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check-circle me-2"></i>Test email sent successfully!
+                        </div>
+                    `;
+                } else {
+                    testEmailResult.innerHTML = `
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-times-circle me-2"></i>Failed to send test email:
+                            <p class="mt-2 mb-0">${data.error || 'Unknown error'}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                testEmailResult.innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-times-circle me-2"></i>Error: ${error.message}
+                    </div>
+                `;
+            })
+            .finally(() => {
+                // Reset button state
+                sendTestEmailBtn.disabled = false;
+                sendTestEmailBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Test';
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'admin/layout.html' %}
+
+{% block admin_title %}Certificate Settings{% endblock %}
+
+{% block admin_content %}
+<script>
+    // Redirect to the new certificate settings page
+    window.location.href = "{{ url_for('admin.certificate_settings_v2') }}";
+</script>
+
+<div class="alert alert-info">
+    Redirecting to certificate settings...
+    If you are not redirected automatically, please <a href="{{ url_for('admin.certificate_settings_v2') }}">click here</a>.
+</div>
+{% endblock %}

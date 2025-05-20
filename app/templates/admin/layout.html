@@ -1,0 +1,180 @@
+{% extends 'layout.html' %}
+
+{% block title %}{% block admin_title %}Admin Panel{% endblock %}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .admin-container {
+        display: flex;
+        min-height: calc(100vh - 58px);
+    }
+    
+    .admin-sidebar {
+        width: 250px;
+        background-color: #f8f9fa;
+        flex-shrink: 0;
+        transition: all 0.3s;
+        overflow-y: auto;
+        top: 58px;
+        bottom: 0;
+        position: sticky;
+        height: calc(100vh - 58px);
+    }
+    
+    .admin-content {
+        flex-grow: 1;
+        overflow-x: hidden;
+    }
+    
+    .sidebar-heading {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #6c757d;
+    }
+    
+    .nav-link {
+        color: #343a40;
+        border-left: 3px solid transparent;
+    }
+    
+    .nav-link:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-left: 3px solid #ddd;
+    }
+    
+    .nav-link.active {
+        color: {{ config.primary_color if config and config.primary_color else "#4a6cf7" }};
+        background-color: rgba(0, 0, 0, 0.03);
+        border-left: 3px solid {{ config.primary_color if config and config.primary_color else "#4a6cf7" }};
+    }
+    
+    @media (max-width: 768px) {
+        .admin-container {
+            flex-direction: column;
+        }
+        
+        .admin-sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-sidebar shadow">
+        <div class="p-3 border-bottom">
+            <h5 class="sidebar-heading d-flex justify-content-between align-items-center">
+                <span>Administration</span>
+            </h5>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.index' %}active{% endif %}" href="{{ url_for('admin.index') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </li>
+            
+            <div class="sidebar-heading px-3 mt-3 mb-1 text-muted">
+                <small>CONTENT MANAGEMENT</small>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.courses' %}active{% endif %}" href="{{ url_for('admin.courses') }}">
+                    <i class="fas fa-book me-2"></i>Courses
+                </a>
+            </li>
+            <!-- Videos, PDFs and Quizzes are accessed through the courses page -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'products.admin' in request.endpoint %}active{% endif %}" href="{{ url_for('products.admin_products') }}">
+                    <i class="fas fa-shopping-cart me-2"></i>Products
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.certificate_settings_v2' %}active{% endif %}" href="{{ url_for('admin.certificate_settings_v2') }}">
+                    <i class="fas fa-certificate me-2"></i>Certificate Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.certificate_templates' %}active{% endif %}" href="{{ url_for('admin.certificate_templates') }}">
+                    <i class="fas fa-layer-group me-2"></i>Certificate Templates
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.certificates' %}active{% endif %}" href="{{ url_for('admin.certificates') }}">
+                    <i class="fas fa-award me-2"></i>Issued Certificates
+                </a>
+            </li>
+            
+            <div class="sidebar-heading px-3 mt-3 mb-1 text-muted">
+                <small>USER MANAGEMENT</small>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}" href="{{ url_for('admin.users') }}">
+                    <i class="fas fa-users me-2"></i>Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.enrollments' %}active{% endif %}" href="{{ url_for('admin.enrollments') }}">
+                    <i class="fas fa-user-graduate me-2"></i>Enrollments
+                </a>
+            </li>
+            
+            <div class="sidebar-heading px-3 mt-3 mb-1 text-muted">
+                <small>PLATFORM SETTINGS</small>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.platform_settings' %}active{% endif %}" href="{{ url_for('admin.platform_settings') }}">
+                    <i class="fas fa-cogs me-2"></i>General Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.email_settings' %}active{% endif %}" href="{{ url_for('admin.email_settings') }}">
+                    <i class="fas fa-envelope me-2"></i>Email Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.email_templates' %}active{% endif %}" href="{{ url_for('admin.email_templates') }}">
+                    <i class="fas fa-file-alt me-2"></i>Email Templates
+                </a>
+            </li>
+            
+            <div class="sidebar-heading px-3 mt-3 mb-1 text-muted">
+                <small>ANALYTICS</small>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.revenue' %}active{% endif %}" href="{{ url_for('admin.revenue') }}">
+                    <i class="fas fa-chart-line me-2"></i>Revenue Analytics
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="admin-content p-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any admin-specific JavaScript here
+    });
+</script>
+{% endblock %}

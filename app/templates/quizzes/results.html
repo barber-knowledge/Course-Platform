@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Quiz Results | {{ quiz.title }} | Modular Course Platform{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('courses.view', course_id=quiz.course_id) }}">{{ quiz.course.title }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('quizzes.take', quiz_id=quiz.id) }}">Quiz</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Results</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Quiz Results: {{ quiz.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-5">
+                        {% if passed %}
+                        <div class="result-icon success mb-3">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                        </div>
+                        <h3 class="text-success">Congratulations! You passed the quiz!</h3>
+                        {% else %}
+                        <div class="result-icon failed mb-3">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                        </div>
+                        <h3 class="text-danger">Sorry, you didn't pass the quiz.</h3>
+                        {% endif %}
+                        <p class="lead">Your score: <strong>{{ score }}%</strong></p>
+                        <p>Passing score: {{ quiz.passing_percentage }}%</p>
+                    </div>
+                    
+                    <div class="result-details">
+                        <h4 class="mb-3">Result Summary</h4>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="progress flex-grow-1 mx-3" style="height: 20px;">
+                                <div class="progress-bar {{ 'bg-success' if passed else 'bg-danger' }}" 
+                                     role="progressbar" 
+                                     style="width: {{ score }}%;" 
+                                     aria-valuenow="{{ score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">{{ score }}%</div>
+                            </div>
+                            <div class="badge {{ 'bg-success' if passed else 'bg-danger' }} p-2">
+                                {{ 'PASSED' if passed else 'FAILED' }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-completed mt-4">
+                        <p class="text-muted">Completed on {{ attempt.completed_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('quizzes.take', quiz_id=quiz.id) }}" class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Retake Quiz
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ url_for('courses.view', course_id=quiz.course_id) }}" class="btn btn-primary w-100">
+                                    <i class="bi bi-arrow-left me-1"></i> Back to Course
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .result-icon {
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress {
+        height: 20px;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}

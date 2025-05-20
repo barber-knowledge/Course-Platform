@@ -1,0 +1,281 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ course.title }} | Modular Course Platform{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('courses.index') }}">Courses</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
+    </ol>
+</nav>
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">{{ course.title }}</h1>
+            
+            {% if enrolled %}
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span>Your Progress</span>
+                        <span>{{ progress_percent|default(0)|int }}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" 
+                            style="width: {{ progress_percent|default(0) }}%" 
+                            aria-valuenow="{{ progress_percent|default(0)|int }}" 
+                            aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <p class="lead">{{ course.description }}</p>
+                    
+                    {% if not enrolled %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4>${{ course.price }}</h4>
+                                <p class="text-muted mb-0">One-time payment, lifetime access</p>
+                            </div>
+                            {% if course.price > 0 %}
+                                <a href="{{ url_for('payments.checkout', course_id=course.id) }}" class="btn btn-success btn-lg">Enroll Now</a>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('courses.enroll', course_id=course.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success btn-lg">Enroll Now (Free)</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center mt-3">
+                            {% if videos and videos|length > 0 %}
+                                {% set start_video = videos[0] %}
+                                {% set found_incomplete = false %}
+                                {% for video in videos %}
+                                    {% if not found_incomplete and video.id in video_progress and not video_progress[video.id].is_completed %}
+                                        {% set start_video = video %}
+                                        {% set found_incomplete = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <a href="{{ url_for('courses.video', course_id=course.id, video_id=start_video.id) }}" 
+                                   class="btn btn-primary btn-lg">
+                                    {% if progress_percent > 0 %}Continue Learning{% else %}Start Course{% endif %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h4 class="card-title mb-0">Course Overview</h4>
+                </div>
+                <div class="card-body">
+                    <h5>What You'll Learn</h5>
+                    
+                    <div class="mt-4">
+                        <h5>Course Content</h5>
+                        <div class="list-group list-group-flush mt-3">
+                            <div class="list-group-item bg-light">
+                                <h6 class="mb-0"><i class="bi bi-camera-video me-2"></i>Videos ({{ videos|length }})</h6>
+                            </div>
+                            
+                            {% for video in videos %}
+                                <a href="{% if enrolled or video.is_free or video.sequence_order == 1 %}{{ url_for('courses.video', course_id=course.id, video_id=video.id) }}{% else %}#{% endif %}" 
+                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                                   {% if not enrolled and not video.is_free and video.sequence_order > 1 %}disabled{% endif %}">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge rounded-pill bg-secondary me-2">{{ loop.index }}</span>
+                                            {{ video.title }}
+                                        </div>
+                                        <small class="text-muted">{{ (video.duration_seconds / 60)|round|int }} minutes</small>
+                                    </div>
+                                    
+                                    {% if not enrolled and not video.is_free and video.sequence_order > 1 %}
+                                        <i class="bi bi-lock"></i>
+                                    {% elif video.id in video_progress and video_progress[video.id].is_completed %}
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                            
+                            {% if pdfs and pdfs|length > 0 %}
+                                <div class="list-group-item bg-light mt-3">
+                                    <h6 class="mb-0"><i class="bi bi-file-pdf me-2"></i>Course Materials ({{ pdfs|length }})</h6>
+                                </div>
+                                
+                                {% for pdf in pdfs %}
+                                    <a href="{% if enrolled %}{{ url_for('courses.view_pdf', course_id=course.id, pdf_id=pdf.id) }}{% else %}#{% endif %}" 
+                                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                                       {% if not enrolled %}disabled{% endif %}">
+                                        <div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-pdf me-2"></i>
+                                                {{ pdf.title }}
+                                            </div>
+                                        </div>
+                                        
+                                        {% if not enrolled %}
+                                            <i class="bi bi-lock"></i>
+                                        {% endif %}
+                                    </a>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            {% if quiz %}
+                                <div class="list-group-item bg-light mt-3">
+                                    <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Assessment</h6>
+                                </div>
+                                
+                                <a href="{% if enrolled and videos_completed %}{{ url_for('quizzes.take', quiz_id=quiz.id) }}{% else %}#{% endif %}" 
+                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                                   {% if not enrolled or not videos_completed %}disabled{% endif %}">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-question-circle me-2"></i>
+                                            {{ quiz.title }}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if not enrolled %}
+                                        <i class="bi bi-lock"></i>
+                                    {% elif not videos_completed %}
+                                        <span class="badge bg-warning text-dark">Complete all videos first</span>
+                                    {% elif quiz_passed %}
+                                        <span class="badge bg-success">Passed</span>
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                            
+                            {% if enrolled and course.has_certificate %}
+                                <div class="list-group-item bg-light mt-3">
+                                    <h6 class="mb-0"><i class="bi bi-award me-2"></i>Certificate</h6>
+                                </div>
+                                
+                                <a href="{% if quiz_passed %}{{ url_for('certificates.view', course_id=course.id) }}{% else %}#{% endif %}" 
+                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                                   {% if not quiz_passed %}disabled{% endif %}">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-award me-2"></i>
+                                            Course Completion Certificate
+                                        </div>
+                                    </div>
+                                    
+                                    {% if not quiz_passed %}
+                                        <span class="badge bg-warning text-dark">Complete quiz first</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Available</span>
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex justify-content-between mb-2">
+                            <span><i class="bi bi-camera-video me-2"></i>Videos:</span>
+                            <span>{{ videos|length }}</span>
+                        </li>
+                        {% if pdfs %}
+                        <li class="d-flex justify-content-between mb-2">
+                            <span><i class="bi bi-file-pdf me-2"></i>PDF Resources:</span>
+                            <span>{{ pdfs|length }}</span>
+                        </li>
+                        {% endif %}
+                        <li class="d-flex justify-content-between mb-2">
+                            <span><i class="bi bi-clock me-2"></i>Total Duration:</span>
+                            <span>
+                                {% set total_seconds = 0 %}
+                                {% for video in videos %}
+                                    {% set total_seconds = total_seconds + video.duration_seconds %}
+                                {% endfor %}
+                                {{ (total_seconds / 60)|round|int }} minutes
+                            </span>
+                        </li>
+                        {% if quiz %}
+                        <li class="d-flex justify-content-between mb-2">
+                            <span><i class="bi bi-question-circle me-2"></i>Final Quiz:</span>
+                            <span>Yes</span>
+                        </li>
+                        {% endif %}
+                        {% if course.has_certificate %}
+                        <li class="d-flex justify-content-between mb-2">
+                            <span><i class="bi bi-award me-2"></i>Certificate:</span>
+                            <span>Yes</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            {% if enrolled and progress_percent > 0 %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Your Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span>Progress</span>
+                        <span>{{ progress_percent|round|int }}%</span>
+                    </div>
+                    <div class="progress mb-4" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" 
+                            style="width: {{ progress_percent }}%" 
+                            aria-valuenow="{{ progress_percent|round|int }}" 
+                            aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="text-center">
+                        {% set start_video = videos[0] %}
+                        {% set found_incomplete = false %}
+                        {% for video in videos %}
+                            {% if not found_incomplete and video.id in video_progress and not video_progress[video.id].is_completed %}
+                                {% set start_video = video %}
+                                {% set found_incomplete = true %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <a href="{{ url_for('courses.video', course_id=course.id, video_id=start_video.id) }}" 
+                           class="btn btn-primary w-100">Resume Learning</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .list-group-item.disabled {
+        color: #6c757d;
+        background-color: #f8f9fa;
+        pointer-events: none;
+    }
+    .progress {
+        height: 8px;
+    }
+</style>
+{% endblock %}

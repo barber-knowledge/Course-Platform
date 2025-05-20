@@ -1,0 +1,69 @@
+{% extends "admin/index.html" %}
+
+{% block title %}Video Popup Associations{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">Video Popup Associations</h4>
+            <div>
+                <a href="{{ url_for('products.admin_popups') }}" class="btn btn-secondary me-2">Manage Popups</a>
+                <a href="{{ url_for('products.admin_products') }}" class="btn btn-secondary">Manage Products</a>
+            </div>
+        </div>
+        
+        {% if videos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Course</th>
+                        <th>Video Title</th>
+                        <th>Duration</th>
+                        <th>Current Popup</th>
+                        <th>Associate Popup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for video in videos %}
+                    <tr>
+                        <td>{{ video.id }}</td>
+                        <td>{{ video.course.title }}</td>
+                        <td>{{ video.title }}</td>
+                        <td>{{ "%d:%02d"|format(video.duration_seconds // 60, video.duration_seconds % 60) }}</td>
+                        <td>
+                            {% if video.popup %}
+                                <span class="badge bg-success">{{ video.popup.product.title }}</span>
+                                <small class="d-block text-muted mt-1">Shows at {{ video.popup.popup_trigger_seconds }} seconds</small>
+                            {% else %}
+                                <span class="badge bg-secondary">None</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('products.set_video_popup', video_id=video.id) }}" class="d-flex gap-2">
+                                <select name="popup_id" class="form-select form-select-sm">
+                                    <option value="">-- No Popup --</option>
+                                    {% for popup in popups %}
+                                    <option value="{{ popup.id }}" {% if video.popup_id == popup.id %}selected{% endif %}>
+                                        {{ popup.product.title }} ({{ popup.popup_trigger_seconds }}s)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No videos found. Add videos to courses first.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

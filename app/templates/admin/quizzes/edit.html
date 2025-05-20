@@ -1,0 +1,134 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit Quiz - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Quiz: {{ quiz.title }}</h1>
+        <a href="{{ url_for('admin.new_question', quiz_id=quiz.id) }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add Question
+        </a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Quiz Details</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <!-- Add CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="title" class="form-label">Quiz Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ quiz.title }}" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="pass_percentage" class="form-label">Passing Percentage</label>
+                        <input type="number" class="form-control" id="pass_percentage" name="pass_percentage" 
+                               value="{{ quiz.passing_percentage }}" min="1" max="100" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ quiz.description }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Quiz Details</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Questions</h5>
+            <a href="{{ url_for('admin.new_question', quiz_id=quiz.id) }}" class="btn btn-sm btn-success">
+                <i class="fas fa-plus"></i> Add Question
+            </a>
+        </div>
+        <div class="card-body">
+            {% if questions %}
+                <div class="list-group">
+                    {% for question in questions %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ question.question_text|truncate(50) }}</h5>
+                                <small>{{ question.points }} point{{ 's' if question.points != 1 }}</small>
+                            </div>
+                            <p class="mb-1">Type: {{ question.question_type|replace('_', ' ')|title }}</p>
+                            <div class="mt-2">
+                                <a href="{{ url_for('admin.edit_question', question_id=question.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal" data-id="{{ question.id }}" 
+                                        data-text="{{ question.question_text|truncate(30) }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No questions have been added to this quiz yet. Click "Add Question" to get started.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('admin.quizzes', course_id=quiz.course_id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Quizzes
+        </a>
+    </div>
+</div>
+
+<!-- Delete Question Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this question?</p>
+                <p><strong id="questionText"></strong></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST">
+                    <!-- Add CSRF token -->
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete Question</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle question deletion modal
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const questionId = button.getAttribute('data-id');
+                const questionText = button.getAttribute('data-text');
+                
+                document.getElementById('questionText').textContent = questionText;
+                document.getElementById('deleteForm').action = "{{ url_for('admin.delete_question', question_id=0) }}".replace('0', questionId);
+            });
+        }
+    });
+</script>
+{% endblock %}

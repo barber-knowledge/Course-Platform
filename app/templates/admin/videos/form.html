@@ -1,0 +1,97 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if video %}Edit Video{% else %}Add New Video{% endif %} - {{ course.title }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">
+        {% if video %}Edit Video{% else %}Add New Video{% endif %} for "{{ course.title }}"
+    </h1>
+    
+    {# Ensure form can handle file uploads #}
+    <form method="POST" enctype="multipart/form-data"> 
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> {# Add CSRF token if using Flask-WTF #}
+        
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" 
+                value="{{ video.title if video else '' }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{ video.description if video else '' }}</textarea>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="sequence_order" class="form-label">Sequence Order</label>
+                <input type="number" class="form-control" id="sequence_order" name="sequence_order" 
+                    value="{{ video.sequence_order if video else '' }}" min="1" required>
+                <div class="form-text">The order in which this video appears in the course</div>
+            </div>
+            <div class="col-md-6">
+                {# Changed to duration_seconds #}
+                <label for="duration_seconds" class="form-label">Duration (seconds)</label>
+                <input type="number" class="form-control" id="duration_seconds" name="duration_seconds" 
+                    value="{{ video.duration_seconds if video else '' }}" min="0" required>
+                <div class="form-text">The length of the video in seconds</div>
+            </div>
+        </div>
+        
+        {% if not video %}
+        {# Field for adding a new video #}
+        <div class="mb-3">
+            <label for="video_file" class="form-label">Video File</label>
+            <input type="file" class="form-control" id="video_file" name="video_file" required 
+                   accept=".mp4,.webm,.ogg"> {# Specify accepted formats #}
+            <div class="form-text">Supported formats: MP4, WebM, Ogg</div>
+        </div>
+        {% else %}
+        {# Field for replacing an existing video #}
+        <div class="mb-3">
+            <label for="video_file" class="form-label">Replace Video (Optional)</label>
+            <input type="file" class="form-control" id="video_file" name="video_file" 
+                   accept=".mp4,.webm,.ogg"> {# Specify accepted formats #}
+            <div class="form-text">Leave empty to keep the existing video.</div>
+        </div>
+        {# Display current video if editing #}
+        <div class="mb-3">
+            <label class="form-label">Current Video</label>
+            {% if video.video_path %}
+            <div class="ratio ratio-16x9">
+                {# Use video.video_path for the source #}
+                <video controls preload="metadata"> 
+                    <source src="{{ url_for('static', filename=video.video_path) }}" type="video/mp4"> 
+                    {# Add other sources if needed e.g., video/webm #}
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            {% else %}
+            <p class="text-muted">No video uploaded yet.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {# is_free checkbox #}
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="is_free" name="is_free" 
+                {% if video and video.is_free %}checked{% endif %}>
+            <label class="form-check-label" for="is_free">Free Preview</label>
+            <div class="form-text">If checked, this video will be available as a free preview</div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 
+                {% if video %}Update{% else %}Save{% endif %} Video
+            </button>
+            <a href="{{ url_for('admin.videos', course_id=course.id) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

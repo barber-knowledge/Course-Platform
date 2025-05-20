@@ -1,0 +1,111 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Email Templates | Admin Panel{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Email Templates</h1>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Template Variables:</strong> These email templates support variables in the format <code>{% raw %}{{ variable_name }}{% endraw %}</code>. 
+        Common variables include: <code>{% raw %}{{ user.name }}{% endraw %}</code>, <code>{% raw %}{{ config.platform_name }}{% endraw %}</code>, 
+        <code>{% raw %}{{ course.title }}{% endraw %}</code>, etc.
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="card-title mb-0">System Email Templates</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for template in templates %}
+                        <tr>
+                            <td>{{ template.name }}</td>
+                            <td>{{ template.subject }}</td>
+                            <td>{{ template.description }}</td>
+                            <td>
+                                {% if template.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Disabled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin.edit_email_template', template_id=template.id) }}" 
+                                       class="btn btn-primary" title="Edit Template">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#resetTemplateModal" 
+                                            data-id="{{ template.id }}" 
+                                            data-name="{{ template.name }}"
+                                            title="Reset to Default">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Template Modal -->
+<div class="modal fade" id="resetTemplateModal" tabindex="-1" aria-labelledby="resetTemplateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetTemplateModalLabel">Reset Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset "<span id="templateName"></span>" to its default values?</p>
+                <p class="text-danger"><strong>Warning:</strong> This will overwrite any customizations you've made.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="resetForm" method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-warning">Reset Template</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up reset modal
+        const resetModal = document.getElementById('resetTemplateModal');
+        if (resetModal) {
+            resetModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const templateId = button.getAttribute('data-id');
+                const templateName = button.getAttribute('data-name');
+                
+                document.getElementById('templateName').textContent = templateName;
+                document.getElementById('resetForm').action = "{{ url_for('admin.reset_email_template', template_id=0) }}".replace('0', templateId);
+            });
+        }
+    });
+</script>
+{% endblock %}

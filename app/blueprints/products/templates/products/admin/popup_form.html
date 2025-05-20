@@ -1,0 +1,147 @@
+{% extends "admin/index.html" %}
+
+{% block title %}{% if popup %}Edit Popup{% else %}New Popup{% endif %}{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">{% if popup %}Edit Popup{% else %}New Popup{% endif %}</h4>
+            <a href="{{ url_for('products.admin_popups') }}" class="btn btn-secondary">Back to Popups</a>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Popup Content</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="headline" class="form-label">Headline *</label>
+                                <input type="text" class="form-control" id="headline" name="headline" value="{{ popup.headline if popup else '' }}" required>
+                                <small class="form-text text-muted">A short, attention-grabbing headline for your popup.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subheadline" class="form-label">Subheadline</label>
+                                <input type="text" class="form-control" id="subheadline" name="subheadline" value="{{ popup.subheadline if popup else '' }}">
+                                <small class="form-text text-muted">An optional secondary line to provide additional context.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3">{{ popup.description if popup else '' }}</textarea>
+                                <small class="form-text text-muted">A brief description of what the user will get.</small>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="button_text" class="form-label">Button Text *</label>
+                                        <input type="text" class="form-control" id="button_text" name="button_text" value="{{ popup.button_text if popup else 'Get it Now' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="product_id" class="form-label">Associated Product *</label>
+                                        <select class="form-select" id="product_id" name="product_id" required>
+                                            <option value="">Select a product</option>
+                                            {% for product in products %}
+                                            <option value="{{ product.id }}" {% if popup and popup.product_id == product.id %}selected{% endif %}>
+                                                {{ product.title }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Display Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="display_duration" class="form-label">Display Duration (seconds)</label>
+                                        <input type="number" class="form-control" id="display_duration" name="display_duration" min="0" value="{{ popup.display_duration if popup else 15 }}">
+                                        <small class="form-text text-muted">How long the popup stays on screen (0 = until dismissed)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="position" class="form-label">Position</label>
+                                        <select class="form-select" id="position" name="position">
+                                            <option value="center" {% if popup and popup.position == 'center' %}selected{% endif %}>Center</option>
+                                            <option value="bottom-right" {% if popup and popup.position == 'bottom-right' %}selected{% endif %}>Bottom Right</option>
+                                            <option value="bottom-left" {% if popup and popup.position == 'bottom-left' %}selected{% endif %}>Bottom Left</option>
+                                            <option value="top-right" {% if popup and popup.position == 'top-right' %}selected{% endif %}>Top Right</option>
+                                            <option value="top-left" {% if popup and popup.position == 'top-left' %}selected{% endif %}>Top Left</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Popup Image</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if popup and popup.image_url %}
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename=popup.image_url) }}" 
+                                     class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="popup_image" class="form-label">Upload Image</label>
+                                <input type="file" class="form-control" id="popup_image" name="popup_image" accept="image/*">
+                                <small class="form-text text-muted">Recommended size: 600x400 pixels. Maximum file size: 2MB.</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                       {% if not popup or popup.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Active</label>
+                                <div><small class="text-muted">Only active popups will be displayed.</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    {% if popup %}Update Popup{% else %}Create Popup{% endif %}
+                </button>
+                <a href="{{ url_for('products.admin_popups') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any initialization code here if needed
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block title %}Setup Complete | Modular Course Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="card shadow-sm">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h1 class="display-5 fw-bold mb-3">Setup Complete!</h1>
+                    <p class="lead mb-4">Your Modular Course Platform has been successfully configured and is ready to use.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <p class="mb-0">The installer has been disabled. If you need to re-configure your platform, you can do so through the Admin Dashboard.</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 col-lg-6 mx-auto">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home me-2"></i> Go to Dashboard
+                        </a>
+                        <a href="{{ url_for('courses.index') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-book me-2"></i> View Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5">
+                <h3>Next Steps</h3>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card mb-3 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-book fa-3x mb-3 text-primary"></i>
+                                <h5>Create Your First Course</h5>
+                                <p>Add a new course with videos and quizzes.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-user-plus fa-3x mb-3 text-primary"></i>
+                                <h5>Invite Users</h5>
+                                <p>Invite students to register on your platform.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-cog fa-3x mb-3 text-primary"></i>
+                                <h5>Advanced Settings</h5>
+                                <p>Configure email notifications and more.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

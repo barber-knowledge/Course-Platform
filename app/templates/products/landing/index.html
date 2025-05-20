@@ -1,0 +1,378 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ meta_title or product.title }}{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="{{ meta_description }}">
+{% if product.seo_keywords %}
+<meta name="keywords" content="{{ product.seo_keywords }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Banner Section -->
+    <div class="jumbotron jumbotron-fluid bg-primary text-white mb-0" 
+         {% if product.banner_image %}
+         style="background-image: url('{{ url_for('static', filename=product.banner_image) }}'); 
+                background-size: cover; 
+                background-position: center;
+                position: relative;"
+         {% endif %}>
+        {% if product.banner_image %}
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);"></div>
+        {% endif %}
+        <div class="container py-5" style="position: relative; z-index: 1;">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="display-4">{{ product.banner_text or product.title }}</h1>
+                    <p class="lead">{{ product.description }}</p>
+                    <div class="mt-4">
+                        {% if product.external_url %}
+                            <a href="{{ product.external_url }}" target="_blank" class="btn btn-light btn-lg">{{ product.cta_secondary_text or "Learn More" }}</a>
+                            <a href="{{ product.external_url }}" target="_blank" class="btn btn-outline-light btn-lg ml-2">{{ product.cta_primary_text or "Buy Now" }}</a>
+                        {% else %}
+                            <a href="{{ url_for('products.view', product_id=product.id) }}" class="btn btn-light btn-lg">{{ product.cta_secondary_text or "Learn More" }}</a>
+                            <a href="{{ url_for('products.checkout', product_id=product.id) }}" class="btn btn-outline-light btn-lg ml-2">{{ product.cta_primary_text or "Buy Now" }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if product.promo_video_url %}
+                <div class="col-md-4">
+                    <div class="embed-responsive embed-responsive-16by9 shadow">
+                        <iframe class="embed-responsive-item" src="{{ product.promo_video_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Section -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-8">
+                {% if product.usp %}
+                <div class="alert alert-primary mb-4" role="alert">
+                    <strong>{{ product.usp }}</strong>
+                </div>
+                {% endif %}
+                
+                <h2 class="mb-4">About This Product</h2>
+                <div class="mb-5">
+                    {{ product.detailed_description | safe }}
+                </div>
+
+                {% if benefits and benefits|length > 0 %}
+                <h3 class="mb-3">Product Benefits</h3>
+                <div class="row mb-5">
+                    {% for benefit in benefits %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="mr-3"><i class="fas fa-check-circle text-success fa-2x"></i></div>
+                                    <div>
+                                        {% if benefit is mapping %}
+                                            <h5>{{ benefit.title }}</h5>
+                                            <p class="mb-0">{{ benefit.description }}</p>
+                                        {% else %}
+                                            <p class="mb-0">{{ benefit }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if features and features|length > 0 %}
+                <h3 class="mb-3">Features</h3>
+                <div class="row mb-5">
+                    {% for feature in features %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="mr-3"><i class="fas fa-star text-warning fa-2x"></i></div>
+                                    <div>
+                                        {% if feature is mapping %}
+                                            <h5>{{ feature.title }}</h5>
+                                            <p class="mb-0">{{ feature.description }}</p>
+                                        {% else %}
+                                            <p class="mb-0">{{ feature }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if testimonials and testimonials|length > 0 %}
+                <h3 class="mb-4">What Our Customers Say</h3>
+                <div class="row mb-5">
+                    {% for testimonial in testimonials %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {% for i in range(5) %}
+                                        {% if testimonial.rating is defined and loop.index <= testimonial.rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <p class="font-italic">"{{ testimonial.text }}"</p>
+                                <div class="d-flex align-items-center mt-3">
+                                    {% if testimonial.image is defined and testimonial.image %}
+                                    <div class="mr-3">
+                                        <img src="{{ url_for('static', filename=testimonial.image) }}" class="rounded-circle" width="50" height="50" alt="{{ testimonial.author }}">
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="mb-0 font-weight-bold">{{ testimonial.author }}</p>
+                                        {% if testimonial.title is defined and testimonial.title %}
+                                        <small class="text-muted">{{ testimonial.title }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if before_after and before_after|length > 0 %}
+                <h3 class="mb-4">Before & After</h3>
+                <div class="row mb-5">
+                    {% for item in before_after %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5>{{ item.title }}</h5>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <h6 class="text-muted">Before</h6>
+                                        <p>{{ item.before }}</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="text-success">After</h6>
+                                        <p>{{ item.after }}</p>
+                                    </div>
+                                </div>
+                                {% if item.quote %}
+                                <p class="font-italic">"{{ item.quote }}"</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow mb-4 sticky-top" style="top: 20px; z-index: 999;">
+                    <div class="card-body">
+                        <h3 class="card-title">Product Details</h3>
+                        {% if product.image_path %}
+                        <img src="{{ url_for('static', filename=product.image_path) }}" class="card-img-top mb-3" alt="{{ product.title }}">
+                        {% endif %}
+                        
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <strong>Price:</strong> 
+                                {% if product.is_free %}
+                                    <span class="badge badge-success">Free</span>
+                                {% else %}
+                                    <span class="h4">${{ product.price }}</span>
+                                {% endif %}
+                            </li>
+                            
+                            {% if specs and specs|length > 0 %}
+                                {% for spec in specs %}
+                                <li class="mb-2"><strong>{{ spec.name }}:</strong> {{ spec.value }}</li>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                        
+                        <div class="text-center mt-4">
+                            {% if product.external_url %}
+                                <a href="{{ product.external_url }}" target="_blank" class="btn btn-primary btn-lg btn-block">{{ product.cta_primary_text or "Buy Now" }}</a>
+                            {% else %}
+                                <a href="{{ url_for('products.checkout', product_id=product.id) }}" class="btn btn-primary btn-lg btn-block">{{ product.cta_primary_text or "Buy Now" }}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if product.guarantee_text %}
+                <div class="card shadow mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Our Guarantee</h5>
+                        <div class="d-flex">
+                            <div class="mr-3">
+                                <i class="fas fa-shield-alt text-primary fa-3x"></i>
+                            </div>
+                            <div>
+                                <p>{{ product.guarantee_text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if product.author_bio %}
+                <div class="card shadow mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">About the Author</h5>
+                        <p>{{ product.author_bio }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    {% if faq and faq|length > 0 %}
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+            <div class="accordion" id="faqAccordion">
+                {% for faq_item in faq %}
+                <div class="card mb-2 border-0 shadow-sm">
+                    <div class="card-header bg-white" id="heading{{ loop.index }}">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link btn-block text-left text-decoration-none" type="button" data-toggle="collapse" data-target="#collapse{{ loop.index }}" aria-expanded="{{ 'true' if loop.first else 'false' }}" aria-controls="collapse{{ loop.index }}">
+                                <i class="fas fa-question-circle text-primary mr-2"></i>
+                                {{ faq_item.question }}
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse{{ loop.index }}" class="collapse {{ 'show' if loop.first else '' }}" aria-labelledby="heading{{ loop.index }}" data-parent="#faqAccordion">
+                        <div class="card-body">
+                            {{ faq_item.answer }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Product Comparison Section -->
+    {% if product_comparison %}
+    <div class="container py-5">
+        <h2 class="text-center mb-5">How We Compare</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Feature</th>
+                        <th>{{ product.title }}</th>
+                        {% for competitor in product_comparison.competitors %}
+                        <th>{{ competitor.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feature in product_comparison.features %}
+                    <tr>
+                        <td><strong>{{ feature.name }}</strong></td>
+                        <td class="bg-light">
+                            {% if feature.our_value == true %}
+                            <i class="fas fa-check text-success"></i>
+                            {% elif feature.our_value == false %}
+                            <i class="fas fa-times text-danger"></i>
+                            {% else %}
+                            {{ feature.our_value }}
+                            {% endif %}
+                        </td>
+                        {% for competitor in product_comparison.competitors %}
+                        <td>
+                            {% set comp_value = feature.competitor_values[loop.index0] if feature.competitor_values and loop.index0 < feature.competitor_values|length else None %}
+                            {% if comp_value == true %}
+                            <i class="fas fa-check text-success"></i>
+                            {% elif comp_value == false %}
+                            <i class="fas fa-times text-danger"></i>
+                            {% else %}
+                            {{ comp_value }}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gallery Section -->
+    {% if gallery_images and gallery_images|length > 0 %}
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Product Gallery</h2>
+            <div class="row">
+                {% for image in gallery_images %}
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <img src="{{ url_for('static', filename=image.path) }}" class="card-img-top" alt="{{ image.alt or product.title }}">
+                        {% if image.caption %}
+                        <div class="card-body">
+                            <p class="card-text">{{ image.caption }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <div class="container py-5 text-center">
+        <h2>Ready to get started?</h2>
+        <p class="lead">Take your experience to the next level!</p>
+        <div class="mt-4">
+            {% if product.external_url %}
+                <a href="{{ product.external_url }}" target="_blank" class="btn btn-primary btn-lg">{{ product.cta_primary_text or "Buy Now" }}</a>
+            {% else %}
+                <a href="{{ url_for('products.checkout', product_id=product.id) }}" class="btn btn-primary btn-lg">{{ product.cta_primary_text or "Buy Now" }}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Smooth scrolling for anchor links
+        $('a[href^="#"]').on('click', function(event) {
+            var target = $(this.getAttribute('href'));
+            if (target.length) {
+                event.preventDefault();
+                $('html, body').stop().animate({
+                    scrollTop: target.offset().top - 100
+                }, 1000);
+            }
+        });
+        
+        // Initialize any carousels or sliders here
+        
+        // Add any landing page specific scripts here
+    });
+</script>
+{% endblock %}

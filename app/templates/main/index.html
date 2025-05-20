@@ -1,0 +1,607 @@
+{% extends "layout.html" %}
+
+{% block title %}Welcome | LearnHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Hero Section - Full width with overlapping elements -->
+    <div class="position-relative bg-gradient-primary text-white overflow-hidden">
+        <div class="container position-relative section-padding">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <span class="badge bg-white text-primary mb-3">Trusted by thousands</span>
+                    <h1 class="display-4 fw-bold mb-4">Unlock Your Potential with Expert-Led Courses</h1>
+                    <p class="lead mb-4">Learn at your own pace with interactive courses, hands-on projects, and earn recognized certificates that boost your career.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('courses.index') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-search me-2"></i>Browse Courses
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Join Free
+                        </a>
+                    </div>
+                    <div class="mt-5 d-none d-md-block">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex">
+                                <div class="avatar-group">
+                                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="User" class="rounded-circle border border-2 border-white" width="40" height="40">
+                                    <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=4361ee&color=fff" alt="User" class="rounded-circle border border-2 border-white" width="40" height="40" style="margin-left: -15px;">
+                                    <img src="https://ui-avatars.com/api/?name=Mike+Jones&background=4361ee&color=fff" alt="User" class="rounded-circle border border-2 border-white" width="40" height="40" style="margin-left: -15px;">
+                                    <span class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center border border-2 border-white" style="width: 40px; height: 40px; margin-left: -15px; font-size: 12px; font-weight: 600;">+2K</span>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <p class="mb-0"><strong>2,000+ learners</strong> joined this month</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-up" data-aos-delay="200">
+                    <div class="position-relative">
+                        <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" class="img-fluid rounded-4 shadow-lg" alt="Learning online" onerror="this.src='https://placehold.co/600x400?text=Online+Learning'">
+                        <div class="position-absolute top-0 start-0 translate-middle bg-white p-3 rounded-4 shadow-lg d-none d-md-block" data-aos="fade-right" data-aos-delay="400">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-video text-primary fa-2x me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Live Classes</div>
+                                    <div class="small text-muted">Interactive sessions</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="position-absolute bottom-0 end-0 translate-middle-y bg-white p-3 rounded-4 shadow-lg d-none d-md-block" data-aos="fade-left" data-aos-delay="600">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-certificate text-warning fa-2x me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Certificates</div>
+                                    <div class="small text-muted">Industry recognized</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Background shapes -->
+        <div class="position-absolute top-0 end-0 d-none d-lg-block">
+            <svg width="450" height="556" viewBox="0 0 450 556" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="277" cy="63" r="225" fill="rgba(255,255,255,0.05)"></circle>
+                <circle cx="17.9997" cy="182" r="18" fill="rgba(255,255,255,0.1)"></circle>
+                <circle cx="76.9997" cy="288" r="34" fill="rgba(255,255,255,0.05)"></circle>
+                <circle cx="325.486" cy="302.87" r="180" transform="rotate(103.889 325.486 302.87)" fill="rgba(255,255,255,0.03)"></circle>
+            </svg>
+        </div>
+    </div>
+    
+    <!-- Stats Counter Section -->
+    <div class="container">
+        <div class="row justify-content-center mt-n5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-soft">
+                    <div class="card-body p-4">
+                        <div class="row g-4 text-center">
+                            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                                <h3 class="fw-bold text-primary mb-1 counter">100+</h3>
+                                <p class="text-muted mb-0">Courses Available</p>
+                            </div>
+                            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                                <h3 class="fw-bold text-primary mb-1 counter">50+</h3>
+                                <p class="text-muted mb-0">Expert Instructors</p>
+                            </div>
+                            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                                <h3 class="fw-bold text-primary mb-1 counter">10K+</h3>
+                                <p class="text-muted mb-0">Active Students</p>
+                            </div>
+                            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                                <h3 class="fw-bold text-primary mb-1 counter">95%</h3>
+                                <p class="text-muted mb-0">Satisfaction Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container section-padding">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <span class="badge bg-primary-subtle text-primary mb-2">Why Choose Us</span>
+                <h2 class="fw-bold mb-3">Designed for a Superior Learning Experience</h2>
+                <p class="lead text-muted">Our platform combines cutting-edge technology with expert-crafted content to deliver an unmatched educational journey.</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-video fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">HD Video Learning</h4>
+                        <p class="card-text text-muted">Crystal-clear videos that bring complex concepts to life through animations and demonstrations.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-certificate fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Verified Certificates</h4>
+                        <p class="card-text text-muted">Earn industry-recognized credentials that showcase your expertise and enhance your resume.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-chart-line fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Progress Tracking</h4>
+                        <p class="card-text text-muted">Monitor your advancement with detailed analytics and pick up where you left off anytime.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Mobile Learning</h4>
+                        <p class="card-text text-muted">Learn on-the-go with our fully responsive platform that works seamlessly across all devices.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Community Support</h4>
+                        <p class="card-text text-muted">Join a vibrant community of learners and instructors who help each other succeed.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="card h-100 border-0 shadow-soft">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-primary-subtle p-3 d-inline-flex mb-4">
+                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Interactive Quizzes</h4>
+                        <p class="card-text text-muted">Reinforce your knowledge with engaging assessments and immediate feedback on your performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Courses Section -->
+    <div class="bg-light py-5">
+        <div class="container section-padding py-5">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                    <span class="badge bg-primary-subtle text-primary mb-2">Top Picks</span>
+                    <h2 class="fw-bold mb-3">Featured Courses</h2>
+                    <p class="lead text-muted">Embark on your learning journey with our highest-rated and most popular courses.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 border-0 shadow-soft">
+                        <div class="position-relative">
+                            <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Programming+Course" class="card-img-top" alt="Programming Course" onerror="this.src='https://placehold.co/600x300/4a6cf7/ffffff?text=Programming+Course'">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-3">Bestseller</span>
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div><i class="fas fa-star text-warning"></i> 4.8 (126)</div>
+                                    <div><i class="far fa-clock me-1"></i> 12 hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Introduction to Programming</h4>
+                            <p class="card-text text-muted">Learn the fundamentals of programming with hands-on projects and real-world applications.</p>
+                        </div>
+                        <div class="card-footer bg-white p-4 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">$49.99</span>
+                                <a href="{{ url_for('courses.index') }}" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart me-1"></i> Enroll Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100 border-0 shadow-soft">
+                        <div class="position-relative">
+                            <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Digital+Marketing" class="card-img-top" alt="Digital Marketing Course" onerror="this.src='https://placehold.co/600x300/4a6cf7/ffffff?text=Digital+Marketing'">
+                            <span class="badge bg-primary position-absolute top-0 start-0 m-3">New</span>
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div><i class="fas fa-star text-warning"></i> 4.7 (89)</div>
+                                    <div><i class="far fa-clock me-1"></i> 10 hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Digital Marketing Mastery</h4>
+                            <p class="card-text text-muted">Master essential digital marketing strategies that drive traffic, conversions, and growth.</p>
+                        </div>
+                        <div class="card-footer bg-white p-4 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">$59.99</span>
+                                <a href="{{ url_for('courses.index') }}" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart me-1"></i> Enroll Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card h-100 border-0 shadow-soft">
+                        <div class="position-relative">
+                            <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Business+Leadership" class="card-img-top" alt="Business Leadership Course" onerror="this.src='https://placehold.co/600x300/4a6cf7/ffffff?text=Business+Leadership'">
+                            <span class="badge bg-secondary position-absolute top-0 start-0 m-3">Popular</span>
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div><i class="fas fa-star text-warning"></i> 4.9 (204)</div>
+                                    <div><i class="far fa-clock me-1"></i> 15 hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Effective Business Leadership</h4>
+                            <p class="card-text text-muted">Develop leadership skills that inspire teams and drive organizational success.</p>
+                        </div>
+                        <div class="card-footer bg-white p-4 border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">$69.99</span>
+                                <a href="{{ url_for('courses.index') }}" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart me-1"></i> Enroll Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="{{ url_for('courses.index') }}" class="btn btn-lg btn-outline-primary">
+                    View All Courses <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="container section-padding">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <span class="badge bg-primary-subtle text-primary mb-2">Success Stories</span>
+                <h2 class="fw-bold mb-3">What Our Students Say</h2>
+                <p class="lead text-muted">Hear from the people who have transformed their careers with our courses.</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-soft p-2">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-quote-left fa-2x text-primary opacity-25"></i>
+                        </div>
+                        <p class="card-text mb-4 lead fst-italic">"The courses on this platform helped me transition from a complete beginner to a professional developer in just 6 months. The instructors are amazing!"</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="John D." class="rounded-circle me-3" width="60" height="60">
+                            <div>
+                                <h5 class="mb-1">John Doe</h5>
+                                <p class="mb-0 text-muted small">Web Developer at TechCorp</p>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-soft p-2">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-quote-left fa-2x text-primary opacity-25"></i>
+                        </div>
+                        <p class="card-text mb-4 lead fst-italic">"The digital marketing course was exactly what I needed to boost my career. I applied what I learned immediately and saw results within weeks."</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://ui-avatars.com/api/?name=Sarah+Miller&background=4361ee&color=fff" alt="Sarah M." class="rounded-circle me-3" width="60" height="60">
+                            <div>
+                                <h5 class="mb-1">Sarah Miller</h5>
+                                <p class="mb-0 text-muted small">Marketing Specialist at BrandGrow</p>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card h-100 border-0 shadow-soft p-2">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-quote-left fa-2x text-primary opacity-25"></i>
+                        </div>
+                        <p class="card-text mb-4 lead fst-italic">"As a business owner, the leadership course gave me invaluable insights. I've implemented the strategies and my team's performance has improved dramatically."</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://ui-avatars.com/api/?name=Michael+Robinson&background=4361ee&color=fff" alt="Michael R." class="rounded-circle me-3" width="60" height="60">
+                            <div>
+                                <h5 class="mb-1">Michael Robinson</h5>
+                                <p class="mb-0 text-muted small">CEO at InnovateTech</p>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="bg-gradient-primary text-white section-padding">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7" data-aos="fade-right">
+                    <h2 class="fw-bold display-5 mb-4">Ready to transform your future?</h2>
+                    <p class="lead mb-4">Join thousands of students who are already advancing their careers with our expert-led courses.</p>
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white rounded-circle p-2 me-3">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="mb-0">Access to 100+ high-quality courses</p>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white rounded-circle p-2 me-3">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="mb-0">Learn at your own pace, anywhere, anytime</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white rounded-circle p-2 me-3">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="mb-0">Get certified and boost your career prospects</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Create Free Account
+                        </a>
+                        <a href="{{ url_for('courses.index') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-th-list me-2"></i>Browse Courses
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 mt-5 mt-lg-0" data-aos="fade-left">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/800x600/ffffff/4a6cf7?text=Start+Your+Learning+Journey+Today" class="img-fluid rounded-4 shadow-lg" alt="Learning journey">
+                        <div class="position-absolute top-0 end-0 translate-middle">
+                            <span class="badge bg-danger p-3 rounded-pill">Limited Time Offer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Background shapes -->
+        <div class="position-absolute bottom-0 start-0 d-none d-lg-block">
+            <svg width="450" height="350" viewBox="0 0 450 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="125" cy="150" r="125" fill="rgba(255,255,255,0.05)"></circle>
+                <circle cx="290" cy="270" r="50" fill="rgba(255,255,255,0.08)"></circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Latest Blog Section -->
+    <div class="container section-padding">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <span class="badge bg-primary-subtle text-primary mb-2">Latest Articles</span>
+                <h2 class="fw-bold mb-3">From Our Blog</h2>
+                <p class="lead text-muted">Stay updated with the latest learning resources, tips, and industry insights.</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-soft">
+                    <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Learning+Tips" class="card-img-top" alt="Blog Post">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-light text-primary">Study Tips</span>
+                            <small class="text-muted">April 20, 2025</small>
+                        </div>
+                        <h4 class="card-title mb-3">10 Effective Learning Techniques for Online Students</h4>
+                        <p class="card-text text-muted">Discover proven strategies to make the most of your online learning experience and retain information better.</p>
+                    </div>
+                    <div class="card-footer bg-white p-4 border-0">
+                        <a href="#" class="btn btn-link text-primary p-0">
+                            Read More <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-soft">
+                    <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Career+Advice" class="card-img-top" alt="Blog Post">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-light text-primary">Career Advice</span>
+                            <small class="text-muted">April 15, 2025</small>
+                        </div>
+                        <h4 class="card-title mb-3">How to Showcase Online Certificates on Your Resume</h4>
+                        <p class="card-text text-muted">Learn how to effectively highlight your online learning achievements to impress potential employers.</p>
+                    </div>
+                    <div class="card-footer bg-white p-4 border-0">
+                        <a href="#" class="btn btn-link text-primary p-0">
+                            Read More <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card h-100 border-0 shadow-soft">
+                    <img src="https://placehold.co/600x300/4a6cf7/ffffff?text=Industry+Trends" class="card-img-top" alt="Blog Post">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-light text-primary">Industry Trends</span>
+                            <small class="text-muted">April 10, 2025</small>
+                        </div>
+                        <h4 class="card-title mb-3">Top Skills Employers Will Be Looking For in 2025</h4>
+                        <p class="card-text text-muted">Stay ahead of the curve by developing these in-demand skills that will make you invaluable in the job market.</p>
+                    </div>
+                    <div class="card-footer bg-white p-4 border-0">
+                        <a href="#" class="btn btn-link text-primary p-0">
+                            Read More <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partners Section -->
+    <div class="bg-light py-5">
+        <div class="container py-4">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                    <span class="badge bg-primary-subtle text-primary mb-2">Trusted By</span>
+                    <h2 class="fw-bold mb-3">Our Partners</h2>
+                    <p class="lead text-muted">We collaborate with industry leaders to deliver relevant, up-to-date content.</p>
+                </div>
+            </div>
+            
+            <div class="row align-items-center justify-content-center">
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-google fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-microsoft fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-amazon fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-apple fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="500">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-facebook fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6 mb-4" data-aos="fade-up" data-aos-delay="600">
+                    <div class="px-4 py-3 text-center">
+                        <i class="fab fa-ibm fa-3x text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    /* Homepage custom styles */
+    .bg-primary-subtle {
+        background-color: rgba(67, 97, 238, 0.1);
+    }
+
+    .avatar-group img {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Custom hero background */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Badge styling */
+    .badge {
+        padding: 0.55em 1em;
+        font-weight: 500;
+    }
+    
+    /* Counter animation */
+    @keyframes countup {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .counter {
+        animation: countup 1s ease-out forwards;
+    }
+    
+    /* Make all section paddings consistent */
+    .section-padding {
+        padding: 6rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Additional JS for animations, counters, etc.
+        // Can add interactive elements here
+    });
+</script>
+{% endblock %}

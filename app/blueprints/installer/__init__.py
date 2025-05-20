@@ -1,0 +1,3 @@
+"""
+Installer blueprint package
+"""

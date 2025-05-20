@@ -1,0 +1,168 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if popup %}Edit Popup{% else %}Add New Popup{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        {% if popup %}Edit Popup{% else %}Add New Popup{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label for="product_id" class="form-label">Associated Product <span class="text-danger">*</span></label>
+                            <select id="product_id" name="product_id" class="form-select" required>
+                                <option value="">-- Select a Product --</option>
+                                {% for product in products %}
+                                    <option value="{{ product.id }}" {% if popup and popup.product_id == product.id %}selected{% endif %}>
+                                        {{ product.title }} 
+                                        {% if product.is_free %}(Free){% else %}(${{ "%.2f"|format(product.price) }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">This popup will promote the selected product</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="popup_text" class="form-label">Popup Text</label>
+                            <textarea id="popup_text" name="popup_text" class="form-control" rows="4">{{ popup.popup_text if popup else '' }}</textarea>
+                            <small class="text-muted">Text content for the popup (optional if using an image)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="popup_image" class="form-label">Popup Image</label>
+                            <input type="file" id="popup_image" name="popup_image" class="form-control" accept="image/png, image/jpeg, image/jpg">
+                            <small class="text-muted">Image to display in the popup (optional)</small>
+                            {% if popup and popup.popup_image %}
+                                <div class="mt-2">
+                                    <p>Current image:</p>
+                                    <img src="{{ url_for('static', filename=popup.popup_image) }}" alt="Popup Image" class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="popup_button_label" class="form-label">Button Label</label>
+                                <input type="text" id="popup_button_label" name="popup_button_label" class="form-control"
+                                       value="{{ popup.popup_button_label if popup else 'Learn More' }}">
+                                <small class="text-muted">Text shown on the popup button</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="popup_trigger_seconds" class="form-label">Trigger Time (seconds)</label>
+                                <input type="number" id="popup_trigger_seconds" name="popup_trigger_seconds" class="form-control" 
+                                       min="0" step="1" value="{{ popup.popup_trigger_seconds if popup else '0' }}">
+                                <small class="text-muted">When to show the popup during video playback (in seconds)</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <h5>Preview</h5>
+                            <div class="card" id="popupPreview">
+                                <div class="card-body text-center" id="popupPreviewContent">
+                                    <p class="preview-text">[Popup content will appear here]</p>
+                                    <div class="preview-image-container" style="display: none;">
+                                        <img class="preview-image img-fluid mb-3" src="" alt="Preview">
+                                    </div>
+                                    <button type="button" class="btn btn-primary preview-button">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('products.admin_popups') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Popups
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 
+                                {% if popup %}Update Popup{% else %}Create Popup{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get form elements for preview
+        const popupText = document.getElementById('popup_text');
+        const popupButtonLabel = document.getElementById('popup_button_label');
+        const popupImage = document.getElementById('popup_image');
+        
+        // Get preview elements
+        const previewText = document.querySelector('.preview-text');
+        const previewButton = document.querySelector('.preview-button');
+        const previewImage = document.querySelector('.preview-image');
+        const previewImageContainer = document.querySelector('.preview-image-container');
+        
+        // Function to update the preview
+        function updatePreview() {
+            // Update button text
+            if (popupButtonLabel.value.trim()) {
+                previewButton.textContent = popupButtonLabel.value;
+            } else {
+                previewButton.textContent = 'Learn More';
+            }
+            
+            // Update popup text
+            if (popupText.value.trim()) {
+                previewText.textContent = popupText.value;
+                previewText.style.display = 'block';
+            } else {
+                previewText.style.display = '{{ "none" if popup and popup.popup_image else "block" }}';
+                previewText.textContent = '[No text content]';
+            }
+            
+            // Handle existing image preview if editing
+            {% if popup and popup.popup_image %}
+            if (!popupImage.files || !popupImage.files[0]) {
+                previewImageContainer.style.display = 'block';
+                previewImage.src = "{{ url_for('static', filename=popup.popup_image) }}";
+            }
+            {% endif %}
+        }
+        
+        // Handle image file selection
+        popupImage.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImageContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            } else {
+                {% if popup and popup.popup_image %}
+                previewImageContainer.style.display = 'block';
+                previewImage.src = "{{ url_for('static', filename=popup.popup_image) }}";
+                {% else %}
+                previewImageContainer.style.display = 'none';
+                {% endif %}
+            }
+        });
+        
+        // Update preview on input changes
+        popupText.addEventListener('input', updatePreview);
+        popupButtonLabel.addEventListener('input', updatePreview);
+        
+        // Initialize the preview
+        updatePreview();
+    });
+</script>
+{% endblock %}

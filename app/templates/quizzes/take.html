@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+
+{% block title %}Quiz: {{ quiz.title }} | Modular Course Platform{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('courses.view', course_id=quiz.course_id) }}">{{ quiz.course.title }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Quiz</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">{{ quiz.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quiz-info mb-4">
+                        <p class="lead">{{ quiz.description }}</p>
+                        <div class="d-flex justify-content-between">
+                            <p><strong>Passing Score:</strong> {{ quiz.passing_percentage }}%</p>
+                            <p><strong>Total Questions:</strong> <span id="totalQuestions">{{ questions|length }}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="progress mb-4">
+                        <div id="quiz-progress" class="progress-bar" role="progressbar" style="width: 0%;" 
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    
+                    <form id="quiz-form" method="POST" action="{{ url_for('quizzes.submit_quiz', quiz_id=quiz.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        {% for question in questions %}
+                            <div class="question-container mb-4" id="question-{{ loop.index }}" style="{% if not loop.first %}display:none;{% endif %}">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between bg-light">
+                                        <span>Question {{ loop.index }} of {{ questions|length }}</span>
+                                        <span class="question-indicator">{{ loop.index }}/{{ questions|length }}</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="question-text mb-4">{{ question.question_text }}</h5>
+                                        
+                                        <div class="options">
+                                            {% for answer in question.answers %}
+                                                <div class="mb-3">
+                                                    <input type="radio" class="btn-check" name="q{{ question.id }}" 
+                                                           id="q{{ question.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}" autocomplete="off">
+                                                    <label class="btn btn-outline-primary w-100 text-start" for="q{{ question.id }}_{{ loop.index0 }}">
+                                                        <span class="me-2">{{ ['A', 'B', 'C', 'D'][loop.index0] }}.</span> {{ answer.answer_text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="navigation mt-4 d-flex justify-content-between">
+                            <button type="button" id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+                            <div id="question-dots" class="d-flex justify-content-center align-items-center">
+                                {% for i in range(questions|length) %}
+                                    <span class="dot mx-1 {% if loop.first %}active{% endif %}" data-question="{{ loop.index }}"></span>
+                                {% endfor %}
+                            </div>
+                            <button type="button" id="next-btn" class="btn btn-primary">Next</button>
+                        </div>
+                        
+                        <div id="submit-container" class="mt-4 text-center" style="display:none;">
+                            <p>You've reached the end of the quiz. Make sure you've answered all questions before submitting.</p>
+                            <button type="submit" id="submit-quiz" class="btn btn-success btn-lg">Submit Quiz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .question-container {
+        transition: all 0.3s ease;
+    }
+    
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #dee2e6;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .dot.active {
+        background-color: #0d6efd;
+        transform: scale(1.2);
+    }
+    
+    .dot.answered {
+        background-color: #198754;
+    }
+
+    .btn-check:checked + .btn-outline-primary {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalQuestions = {{ questions|length }};
+        const questions = document.querySelectorAll('.question-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitContainer = document.getElementById('submit-container');
+        const progressBar = document.getElementById('quiz-progress');
+        const dots = document.querySelectorAll('.dot');
+        
+        let currentQuestion = 1;
+        let answeredQuestions = new Set();
+        
+        // Update progress function
+        function updateProgress() {
+            const progress = Math.round((answeredQuestions.size / totalQuestions) * 100);
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+            
+            // Update dots
+            dots.forEach((dot, index) => {
+                const questionNum = index + 1;
+                const questionElement = questions[index];
+                const questionId = questionElement.id.split('-')[1];
+                
+                // Get the question ID from the input name (remove the 'q' prefix)
+                const inputName = questionElement.querySelector('input[type="radio"]').name;
+                const radioButtons = document.querySelectorAll(`input[name="${inputName}"]`);
+                const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
+                
+                if (isAnswered) {
+                    dot.classList.add('answered');
+                    answeredQuestions.add(questionNum);
+                } else {
+                    dot.classList.remove('answered');
+                    answeredQuestions.delete(questionNum);
+                }
+            });
+        }
+        
+        // Navigate to specific question
+        function goToQuestion(questionNum) {
+            questions.forEach(q => q.style.display = 'none');
+            questions[questionNum - 1].style.display = 'block';
+            
+            currentQuestion = questionNum;
+            
+            // Update active dot
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentQuestion - 1].classList.add('active');
+            
+            // Disable/Enable navigation buttons
+            prevBtn.disabled = currentQuestion === 1;
+            
+            if (currentQuestion === totalQuestions) {
+                nextBtn.style.display = 'none';
+                submitContainer.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitContainer.style.display = 'none';
+            }
+        }
+        
+        // Add event listeners to navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 1) {
+                goToQuestion(currentQuestion - 1);
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < totalQuestions) {
+                goToQuestion(currentQuestion + 1);
+            }
+        });
+        
+        // Add event listeners to dots
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                goToQuestion(parseInt(dot.dataset.question));
+            });
+        });
+        
+        // Add event listeners to radio buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateProgress);
+        });
+        
+        // Initialize
+        updateProgress();
+        
+        // Form validation
+        document.getElementById('quiz-form').addEventListener('submit', function(e) {
+            if (answeredQuestions.size < totalQuestions) {
+                e.preventDefault();
+                alert('Please answer all questions before submitting the quiz.');
+                return false;
+            }
+        });
+
+        // Debug check for questions
+        console.log('Total questions loaded:', totalQuestions);
+        if (totalQuestions === 0) {
+            console.error('No quiz questions found. Please check your quiz configuration.');
+            document.querySelector('.card-body').insertAdjacentHTML('afterbegin', 
+            '<div class="alert alert-warning mb-4">No questions found for this quiz. Please contact an administrator.</div>');
+        }
+    });
+</script>
+{% endblock %}

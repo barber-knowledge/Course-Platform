@@ -1,0 +1,948 @@
+{% extends "admin/index.html" %}
+
+{% block title %}{% if product %}Edit Product{% else %}New Product{% endif %}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .card {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.125);
+        padding: 0.75rem 1.25rem;
+    }
+    .preview-image {
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        background-color: #f8f9fa;
+    }
+    .preview-image-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    .image-remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255,255,255,0.7);
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        text-align: center;
+        cursor: pointer;
+        color: #dc3545;
+    }
+    .tab-content {
+        padding: 1.5rem;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 0.25rem 0.25rem;
+    }
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        color: #007bff;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: .5rem;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+    }
+    .dynamic-form-item {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+        position: relative;
+    }
+    .dynamic-form-item .remove-item {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: #dc3545;
+        cursor: pointer;
+    }
+    #save-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        padding: 0.75rem 1.5rem;
+    }
+    .form-tips {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    .summernote {
+        min-height: 200px;
+    }
+    .summernote-short {
+        min-height: 150px;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid pt-4 px-4">
+    <form method="POST" enctype="multipart/form-data" id="product-form">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="mb-0">{% if product %}Edit Product: {{ product.title }}{% else %}New Product{% endif %}</h2>
+            <div>
+                <a href="{{ url_for('products.admin_products') }}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="save-button">
+                    <i class="fas fa-save me-1"></i> Save Product
+                </button>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Main Content Tabs -->
+                <ul class="nav nav-tabs mb-3" id="mainContentTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="general-tab" data-bs-toggle="tab" href="#general" role="tab">
+                            <i class="fas fa-info-circle me-1"></i> General Info
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="descriptions-tab" data-bs-toggle="tab" href="#descriptions" role="tab">
+                            <i class="fas fa-align-left me-1"></i> Descriptions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="marketing-tab" data-bs-toggle="tab" href="#marketing" role="tab">
+                            <i class="fas fa-bullhorn me-1"></i> Marketing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="seo-tab" data-bs-toggle="tab" href="#seo" role="tab">
+                            <i class="fas fa-search me-1"></i> SEO
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="advanced-tab" data-bs-toggle="tab" href="#advanced" role="tab">
+                            <i class="fas fa-cog me-1"></i> Advanced
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="mainContentTabsContent">
+                    <!-- General Tab -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Product Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="title" class="form-label">Title *</label>
+                                        <input type="text" class="form-control" id="title" name="title" 
+                                               value="{{ product.title if product else '' }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="slug" class="form-label">Slug</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="slug" name="slug" 
+                                                   value="{{ product.slug if product else '' }}" 
+                                                   placeholder="auto-generated-from-title">
+                                            <button class="btn btn-outline-secondary" type="button" id="generate-slug">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-tips">URL-friendly version of title. Leave blank to auto-generate.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="product_type" class="form-label">Product Type *</label>
+                                        <select class="form-select" id="product_type" name="product_type" required>
+                                            <option value="ebook" {% if product and product.product_type == 'ebook' %}selected{% endif %}>E-book</option>
+                                            <option value="course" {% if product and product.product_type == 'course' %}selected{% endif %}>Course</option>
+                                            <option value="bundle" {% if product and product.product_type == 'bundle' %}selected{% endif %}>Bundle</option>
+                                            <option value="membership" {% if product and product.product_type == 'membership' %}selected{% endif %}>Membership</option>
+                                            <option value="other" {% if product and product.product_type == 'other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sku" class="form-label">SKU</label>
+                                        <input type="text" class="form-control" id="sku" name="sku" 
+                                               value="{{ product.sku if product else '' }}">
+                                        <small class="form-tips">Unique Stock Keeping Unit (optional)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Pricing</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-end">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="is_free" name="is_free" 
+                                                {% if product and product.is_free %}checked{% endif %}
+                                                onchange="document.getElementById('price').disabled = this.checked">
+                                            <label class="form-check-label" for="is_free">
+                                                This is a free product
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="price" class="form-label">Price ($) *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" 
+                                                   value="{{ '%.2f'|format(product.price) if product else '0.00' }}"
+                                                   {% if product and product.is_free %}disabled{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 mt-2">
+                                    <label for="pricing_tiers" class="form-label">Pricing Tiers (JSON)</label>
+                                    <textarea class="form-control" id="pricing_tiers" name="pricing_tiers" rows="3">{{ product.pricing_tiers if product and product.pricing_tiers else '' }}</textarea>
+                                    <small class="form-tips">Optional JSON array with different pricing tiers, e.g. [{"name":"Basic","price":9.99,"features":["..."]}]</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">External Resource</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="has_external_url" name="has_external_url" 
+                                            {% if product and product.has_external_url %}checked{% endif %}
+                                            onchange="document.getElementById('external_url').disabled = !this.checked">
+                                        <label class="form-check-label" for="has_external_url">
+                                            This product links to an external resource
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="external_url" class="form-label">External URL</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                        <input type="url" class="form-control" id="external_url" name="external_url" 
+                                               value="{{ product.external_url if product and product.external_url else '' }}"
+                                               {% if not product or not product.has_external_url %}disabled{% endif %}
+                                               placeholder="https://...">
+                                    </div>
+                                    <small class="form-tips">If this product links to an external resource, provide the URL here.</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="download_link" class="form-label">Download Link</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-download"></i></span>
+                                        <input type="url" class="form-control" id="download_link" name="download_link" 
+                                               value="{{ product.download_link if product and product.download_link else '' }}"
+                                               placeholder="https://...">
+                                    </div>
+                                    <small class="form-tips">Direct download link for digital products (e.g. PDF, ZIP)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Descriptions Tab -->
+                    <div class="tab-pane fade" id="descriptions" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Basic Description</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Short Description *</label>
+                                    <textarea class="form-control summernote-short" id="description" name="description" rows="3">{{ product.description if product else '' }}</textarea>
+                                    <small class="form-tips">Brief product description (shown in listings)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Detailed Description</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="detailed_description" class="form-label">Detailed Description</label>
+                                    <textarea class="form-control summernote" id="detailed_description" name="detailed_description" rows="8">{{ product.detailed_description if product else '' }}</textarea>
+                                    <small class="form-tips">Full product description shown on product page</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Technical Specifications</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="technical_specs" class="form-label">Technical Specifications</label>
+                                    <textarea class="form-control summernote-short" id="technical_specs" name="technical_specs" rows="4">{{ product.technical_specs if product else '' }}</textarea>
+                                    <small class="form-tips">Technical details about the product</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Author Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="author_bio" class="form-label">Author Biography</label>
+                                    <textarea class="form-control summernote-short" id="author_bio" name="author_bio" rows="4">{{ product.author_bio if product else '' }}</textarea>
+                                    <small class="form-tips">Information about the author or creator</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Marketing Tab -->
+                    <div class="tab-pane fade" id="marketing" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Benefits & Features</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Benefits (What users will gain)</label>
+                                    <div id="benefits-container">
+                                        <!-- Dynamic benefits will be added here -->
+                                        {% if product and product.benefits %}
+                                            {% set benefits = product.benefits|tojson|safe|from_json %}
+                                            {% if benefits is iterable %}
+                                                {% for benefit in benefits %}
+                                                <div class="dynamic-form-item">
+                                                    <span class="remove-item"><i class="fas fa-times"></i></span>
+                                                    <input type="text" class="form-control benefit-item" 
+                                                           value="{{ benefit }}" placeholder="e.g. Master new skills in 30 days">
+                                                </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    <input type="hidden" name="benefits" id="benefits-json">
+                                    <button type="button" class="btn btn-outline-primary mt-2" id="add-benefit">
+                                        <i class="fas fa-plus"></i> Add Benefit
+                                    </button>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="features" class="form-label">Product Features</label>
+                                    <textarea class="form-control summernote-short" id="features" name="features" rows="4">{{ product.features if product else '' }}</textarea>
+                                    <small class="form-tips">Key features of your product</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="usp" class="form-label">Unique Selling Proposition</label>
+                                    <textarea class="form-control" id="usp" name="usp" rows="2">{{ product.usp if product else '' }}</textarea>
+                                    <small class="form-tips">What makes your product special or different?</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Testimonials & Social Proof</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="testimonials" class="form-label">Testimonials</label>
+                                    <textarea class="form-control summernote" id="testimonials" name="testimonials" rows="4">{{ product.testimonials if product else '' }}</textarea>
+                                    <small class="form-tips">Customer reviews and feedback</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="social_proof" class="form-label">Social Proof</label>
+                                    <textarea class="form-control" id="social_proof" name="social_proof" rows="3">{{ product.social_proof if product else '' }}</textarea>
+                                    <small class="form-tips">Statistics, user counts, awards, or mentions in media</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">FAQ</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="faq-container">
+                                    <!-- Dynamic FAQ items will be added here -->
+                                    {% if product and product.faq %}
+                                        {% set faq_items = product.faq|tojson|safe|from_json %}
+                                        {% if faq_items is iterable %}
+                                            {% for faq in faq_items %}
+                                            <div class="dynamic-form-item">
+                                                <span class="remove-item"><i class="fas fa-times"></i></span>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Question</label>
+                                                    <input type="text" class="form-control faq-question" 
+                                                           value="{{ faq.question }}" placeholder="e.g. How long does shipping take?">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Answer</label>
+                                                    <textarea class="form-control faq-answer" rows="2">{{ faq.answer }}</textarea>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <input type="hidden" name="faq" id="faq-json">
+                                <button type="button" class="btn btn-outline-primary mt-2" id="add-faq">
+                                    <i class="fas fa-plus"></i> Add FAQ Item
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Call to Action</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cta_primary_text" class="form-label">Primary CTA Text</label>
+                                        <input type="text" class="form-control" id="cta_primary_text" name="cta_primary_text" 
+                                               value="{{ product.cta_primary_text if product else 'Buy Now' }}" 
+                                               placeholder="e.g. Buy Now">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cta_secondary_text" class="form-label">Secondary CTA Text</label>
+                                        <input type="text" class="form-control" id="cta_secondary_text" name="cta_secondary_text" 
+                                               value="{{ product.cta_secondary_text if product else 'Learn More' }}" 
+                                               placeholder="e.g. Learn More">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="guarantee_text" class="form-label">Guarantee/Refund Policy</label>
+                                    <textarea class="form-control" id="guarantee_text" name="guarantee_text" rows="2">{{ product.guarantee_text if product else '' }}</textarea>
+                                    <small class="form-tips">e.g. "30-day money-back guarantee"</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="limited_offer_check" 
+                                               {% if product and product.limited_offer %}checked{% endif %}
+                                               onchange="document.getElementById('limited_offer').disabled = !this.checked">
+                                        <label class="form-check-label" for="limited_offer_check">
+                                            This is a limited-time offer
+                                        </label>
+                                    </div>
+                                    <textarea class="form-control mt-2" id="limited_offer" name="limited_offer" rows="2"
+                                              {% if not product or not product.limited_offer %}disabled{% endif %}>{{ product.limited_offer if product else '' }}</textarea>
+                                    <small class="form-tips">e.g. "Special offer ends on May 30th" or "Only 5 seats remaining"</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SEO Tab -->
+                    <div class="tab-pane fade" id="seo" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">SEO Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="meta_title" class="form-label">Meta Title</label>
+                                    <input type="text" class="form-control" id="meta_title" name="meta_title" 
+                                           value="{{ product.meta_title if product else '' }}">
+                                    <small class="form-tips">Title that appears in search engine results (55-60 chars recommended)</small>
+                                    <div id="meta-title-counter" class="text-muted small mt-1"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="meta_description" class="form-label">Meta Description</label>
+                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3">{{ product.meta_description if product else '' }}</textarea>
+                                    <small class="form-tips">Description that appears in search engine results (150-160 chars recommended)</small>
+                                    <div id="meta-description-counter" class="text-muted small mt-1"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="seo_keywords" class="form-label">SEO Keywords</label>
+                                    <input type="text" class="form-control" id="seo_keywords" name="seo_keywords" 
+                                           value="{{ product.seo_keywords if product else '' }}">
+                                    <small class="form-tips">Comma-separated keywords related to your product</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Landing Page Content</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="banner_text" class="form-label">Banner Text</label>
+                                    <input type="text" class="form-control" id="banner_text" name="banner_text" 
+                                           value="{{ product.banner_text if product else '' }}">
+                                    <small class="form-tips">Text to display on the landing page banner</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="banner_image" class="form-label">Banner Image</label>
+                                    {% if product and product.banner_image %}
+                                    <div class="preview-image-container mb-2">
+                                        <img src="{{ url_for('static', filename=product.banner_image) }}" class="preview-image" id="banner-preview">
+                                        <span class="image-remove-btn" id="remove-banner"><i class="fas fa-times"></i></span>
+                                    </div>
+                                    {% else %}
+                                    <div class="preview-image-container mb-2" style="display:none;">
+                                        <img src="" class="preview-image" id="banner-preview">
+                                        <span class="image-remove-btn" id="remove-banner"><i class="fas fa-times"></i></span>
+                                    </div>
+                                    {% endif %}
+                                    <input type="file" class="form-control" id="banner_image" name="banner_image" accept="image/*">
+                                    <small class="form-tips">Recommended size: 1200x400 pixels</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="promo_video_url" class="form-label">Promo Video URL</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fab fa-youtube"></i></span>
+                                        <input type="url" class="form-control" id="promo_video_url" name="promo_video_url" 
+                                               value="{{ product.promo_video_url if product else '' }}"
+                                               placeholder="https://www.youtube.com/watch?v=...">
+                                    </div>
+                                    <small class="form-tips">YouTube or Vimeo URL for promotional video</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Tab -->
+                    <div class="tab-pane fade" id="advanced" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Customer Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="customer_avatars" class="form-label">Customer Avatars</label>
+                                    <textarea class="form-control" id="customer_avatars" name="customer_avatars" rows="4">{{ product.customer_avatars if product else '' }}</textarea>
+                                    <small class="form-tips">Description of ideal customers for this product</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="before_after" class="form-label">Before/After Transformation</label>
+                                    <textarea class="form-control" id="before_after" name="before_after" rows="4">{{ product.before_after if product else '' }}</textarea>
+                                    <small class="form-tips">Describe the transformation customers will experience</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Related Products</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="related_products" class="form-label">Related Products</label>
+                                    <textarea class="form-control" id="related_products" name="related_products" rows="2">{{ product.related_products if product else '' }}</textarea>
+                                    <small class="form-tips">Comma-separated IDs of related products</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="product_comparison" class="form-label">Product Comparison</label>
+                                    <textarea class="form-control" id="product_comparison" name="product_comparison" rows="4">{{ product.product_comparison if product else '' }}</textarea>
+                                    <small class="form-tips">How this product compares to alternatives</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Gallery Images</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="gallery_images" class="form-label">Gallery Images JSON</label>
+                                    <textarea class="form-control" id="gallery_images" name="gallery_images" rows="3">{{ product.gallery_images if product else '' }}</textarea>
+                                    <small class="form-tips">JSON array of image paths or URLs</small>
+                                </div>
+                                <!-- Future enhancement: Add multiple image upload functionality -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Status Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                       {% if not product or product.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Active</label>
+                            </div>
+                            <small class="form-text text-muted">Only active products are visible to users.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" 
+                                       {% if product and product.is_featured %}checked{% endif %}>
+                                <label class="form-check-label" for="is_featured">Featured</label>
+                            </div>
+                            <small class="form-text text-muted">Featured products appear prominently on the platform.</small>
+                        </div>
+                        
+                        {% if product %}
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-muted mb-2"><small>Created: {{ product.created_at.strftime('%Y-%m-%d') }}</small></div>
+                            <div class="text-muted"><small>Last updated: {{ product.updated_at.strftime('%Y-%m-%d') }}</small></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Product Image Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Image</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if product and product.image_path %}
+                        <div class="preview-image-container mb-3">
+                            <img src="{{ url_for('static', filename=product.image_path) }}" 
+                                 class="preview-image img-fluid" id="product-preview">
+                            <span class="image-remove-btn" id="remove-product-image"><i class="fas fa-times"></i></span>
+                        </div>
+                        {% else %}
+                        <div class="preview-image-container mb-3" style="display:none;">
+                            <img src="" class="preview-image img-fluid" id="product-preview">
+                            <span class="image-remove-btn" id="remove-product-image"><i class="fas fa-times"></i></span>
+                        </div>
+                        <div class="mb-3 text-center" id="product-image-placeholder">
+                            <i class="fas fa-image fa-5x text-muted"></i>
+                            <p class="text-muted mt-2">No image uploaded</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="product_image" class="form-label d-block text-start">Upload Image</label>
+                            <input type="file" class="form-control" id="product_image" name="product_image" accept="image/*">
+                            <small class="form-text text-muted d-block text-start mt-1">Recommended size: 800x600 pixels. Maximum file size: 5MB.</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Preview Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="product-preview-card">
+                            <h5 id="preview-title">{{ product.title if product else 'Product Title' }}</h5>
+                            <p class="mb-2" id="preview-price">
+                                {% if product and product.is_free %}
+                                    <span class="badge bg-success">Free</span>
+                                {% else %}
+                                    ${{ '%.2f'|format(product.price) if product else '0.00' }}
+                                {% endif %}
+                            </p>
+                            <p class="text-muted small" id="preview-description">
+                                {{ product.description|striptags if product else 'Product description will appear here...' }}
+                            </p>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-sm btn-primary disabled">
+                                    {{ product.cta_primary_text if product and product.cta_primary_text else 'Buy Now' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">This is a preview of how your product will appear in listings</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize rich text editors
+        $('.summernote').summernote({
+            height: 200,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+        
+        $('.summernote-short').summernote({
+            height: 150,
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['para', ['ul', 'ol']],
+                ['insert', ['link']],
+                ['view', ['fullscreen']]
+            ]
+        });
+        
+        // Generate slug from title
+        $('#generate-slug').click(function() {
+            const title = $('#title').val();
+            if (title) {
+                // Convert to lowercase, replace spaces with hyphens, remove special chars
+                const slug = title.toLowerCase()
+                    .replace(/\s+/g, '-')           // Replace spaces with -
+                    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                    .replace(/^-+/, '')             // Trim - from start of text
+                    .replace(/-+$/, '');            // Trim - from end of text
+                
+                $('#slug').val(slug);
+            }
+        });
+        
+        // Title also updates slug on change if slug is empty
+        $('#title').on('blur', function() {
+            if ($('#slug').val() === '') {
+                $('#generate-slug').click();
+            }
+        });
+        
+        // Preview functionality
+        $('#title').on('input', function() {
+            $('#preview-title').text($(this).val() || 'Product Title');
+        });
+        
+        $('#price, #is_free').on('change', function() {
+            updatePricePreview();
+        });
+        
+        function updatePricePreview() {
+            if ($('#is_free').is(':checked')) {
+                $('#preview-price').html('<span class="badge bg-success">Free</span>');
+            } else {
+                const price = parseFloat($('#price').val()) || 0;
+                $('#preview-price').text('$' + price.toFixed(2));
+            }
+        }
+        
+        $('#description').on('summernote.change', function() {
+            const plainText = $(this).summernote('code').replace(/<[^>]*>/g, '');
+            $('#preview-description').text(plainText.substring(0, 100) + (plainText.length > 100 ? '...' : ''));
+        });
+        
+        $('#cta_primary_text').on('input', function() {
+            $('.btn-primary.disabled').text($(this).val() || 'Buy Now');
+        });
+        
+        // Image preview functionality
+        $('#product_image').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#product-preview').attr('src', e.target.result);
+                    $('.preview-image-container').show();
+                    $('#product-image-placeholder').hide();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        $('#remove-product-image').click(function() {
+            $('#product_image').val('');
+            $('#product-preview').attr('src', '');
+            $('.preview-image-container').hide();
+            $('#product-image-placeholder').show();
+            // Add hidden input to indicate image should be removed
+            if (!$('#remove_image').length) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    id: 'remove_image',
+                    name: 'remove_image',
+                    value: '1'
+                }).appendTo('#product-form');
+            }
+        });
+        
+        // Banner image preview
+        $('#banner_image').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#banner-preview').attr('src', e.target.result);
+                    $('#banner-preview').parent().show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        $('#remove-banner').click(function() {
+            $('#banner_image').val('');
+            $('#banner-preview').attr('src', '');
+            $('#banner-preview').parent().hide();
+            // Add hidden input to indicate banner image should be removed
+            if (!$('#remove_banner').length) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    id: 'remove_banner',
+                    name: 'remove_banner',
+                    value: '1'
+                }).appendTo('#product-form');
+            }
+        });
+        
+        // Dynamic Benefits
+        $('#add-benefit').click(function() {
+            const newItem = `
+                <div class="dynamic-form-item">
+                    <span class="remove-item"><i class="fas fa-times"></i></span>
+                    <input type="text" class="form-control benefit-item" 
+                           placeholder="e.g. Master new skills in 30 days">
+                </div>
+            `;
+            $('#benefits-container').append(newItem);
+        });
+        
+        // If no benefits exist, add an empty one
+        if ($('#benefits-container').children().length === 0) {
+            $('#add-benefit').click();
+        }
+        
+        // Dynamic FAQ
+        $('#add-faq').click(function() {
+            const newItem = `
+                <div class="dynamic-form-item">
+                    <span class="remove-item"><i class="fas fa-times"></i></span>
+                    <div class="mb-2">
+                        <label class="form-label">Question</label>
+                        <input type="text" class="form-control faq-question" 
+                               placeholder="e.g. How long does shipping take?">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Answer</label>
+                        <textarea class="form-control faq-answer" rows="2"></textarea>
+                    </div>
+                </div>
+            `;
+            $('#faq-container').append(newItem);
+        });
+        
+        // If no FAQ items exist, add an empty one
+        if ($('#faq-container').children().length === 0) {
+            $('#add-faq').click();
+        }
+        
+        // Remove dynamic items (delegated event)
+        $(document).on('click', '.remove-item', function() {
+            $(this).closest('.dynamic-form-item').remove();
+        });
+        
+        // Compile JSON data before form submission
+        $('#product-form').on('submit', function() {
+            // Collect benefits
+            const benefits = [];
+            $('.benefit-item').each(function() {
+                const value = $(this).val().trim();
+                if (value) {
+                    benefits.push(value);
+                }
+            });
+            $('#benefits-json').val(JSON.stringify(benefits));
+            
+            // Collect FAQ items
+            const faqItems = [];
+            $('#faq-container .dynamic-form-item').each(function() {
+                const question = $(this).find('.faq-question').val().trim();
+                const answer = $(this).find('.faq-answer').val().trim();
+                if (question && answer) {
+                    faqItems.push({
+                        question: question,
+                        answer: answer
+                    });
+                }
+            });
+            $('#faq-json').val(JSON.stringify(faqItems));
+        });
+        
+        // Character counters for SEO fields
+        $('#meta_title').on('input', function() {
+            const count = $(this).val().length;
+            const ideal = count >= 50 && count <= 60;
+            $('#meta-title-counter').html(
+                `${count} characters ${ideal ? '<span class="text-success">(ideal length)</span>' : ''}`
+            );
+        }).trigger('input');
+        
+        $('#meta_description').on('input', function() {
+            const count = $(this).val().length;
+            const ideal = count >= 150 && count <= 160;
+            $('#meta-description-counter').html(
+                `${count} characters ${ideal ? '<span class="text-success">(ideal length)</span>' : ''}`
+            );
+        }).trigger('input');
+        
+        // Limited offer toggle
+        $('#limited_offer_check').change(function() {
+            $('#limited_offer').prop('disabled', !this.checked);
+        });
+    });
+</script>
+{% endblock %}

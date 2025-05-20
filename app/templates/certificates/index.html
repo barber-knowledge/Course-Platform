@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">My Certificates</h1>
+    
+    {% if certificates %}
+        <div class="row">
+            {% for certificate in certificates %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ certificate.course.title }}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">Issued on: {{ certificate.issue_date.strftime('%B %d, %Y') }}</small>
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('certificates.view', course_id=certificate.course_id) }}" 
+                                   class="btn btn-primary">View Certificate</a>
+                                <a href="{{ url_for('certificates.download', course_id=certificate.course_id) }}" 
+                                   class="btn btn-outline-secondary">Download</a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>Certificate ID: {{ certificate.certificate_id[:8] }}...</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>You haven't earned any certificates yet.</p>
+            <p>Complete courses successfully to earn certificates.</p>
+            <a href="{{ url_for('courses.index') }}" class="btn btn-primary">Browse Courses</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

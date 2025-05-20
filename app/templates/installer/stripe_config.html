@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}Stripe Configuration | Setup Wizard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Stripe Payment Configuration</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Configure Stripe payment integration for your course platform.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fs-4 me-3"></i>
+                            <div>
+                                <p class="mb-0">This step is optional. You can configure Stripe later from the admin dashboard.</p>
+                                <p class="mb-0 small">Stripe integration enables you to accept payments for paid courses.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('installer.stripe_config') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="stripe_enabled" name="stripe_enabled"
+                                   {% if config.stripe_enabled %}checked{% endif %}>
+                            <label class="form-check-label" for="stripe_enabled">Enable Stripe Payments</label>
+                        </div>
+                        
+                        <div id="stripe-settings" {% if not config.stripe_enabled %}style="display:none"{% endif %}>
+                            <div class="mb-3">
+                                <label for="stripe_secret_key" class="form-label">Stripe Secret Key</label>
+                                <input type="text" class="form-control" id="stripe_secret_key" name="stripe_secret_key"
+                                       value="{{ config.stripe_secret_key }}">
+                                <div class="form-text">Your Stripe Secret Key. It starts with 'sk_'.</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="stripe_publishable_key" class="form-label">Stripe Publishable Key</label>
+                                <input type="text" class="form-control" id="stripe_publishable_key" name="stripe_publishable_key"
+                                       value="{{ config.stripe_publishable_key }}">
+                                <div class="form-text">Your Stripe Publishable Key. It starts with 'pk_'.</div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <span>Never share your Stripe Secret Key. It should be kept confidential.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Save Configuration</button>
+                            <a href="{{ url_for('installer.index') }}" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="text-center">
+                        <p class="text-muted mb-0">Don't have a Stripe account? <a href="https://dashboard.stripe.com/register" target="_blank">Sign up here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stripeEnabled = document.getElementById('stripe_enabled');
+        const stripeSettings = document.getElementById('stripe-settings');
+        
+        stripeEnabled.addEventListener('change', function() {
+            if (this.checked) {
+                stripeSettings.style.display = 'block';
+            } else {
+                stripeSettings.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+
+{% block title %}Products - {{ super() }}{% endblock %}
+
+{% block styles %}
+<style>
+    .product-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .product-img-container {
+        height: 200px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+    
+    .product-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    
+    .product-price {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #4a6cf7;
+    }
+    
+    .product-price.free {
+        color: #28a745;
+    }
+    
+    .badge-free {
+        background-color: #28a745;
+        color: white;
+        font-weight: 500;
+    }
+    
+    .product-card .card-footer {
+        background-color: white;
+        border-top: none;
+        padding-top: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-shopping-bag me-2 text-primary"></i> Products
+            </h1>
+            <p class="lead text-muted">Explore our collection of high-quality products and resources</p>
+        </div>
+    </div>
+
+    {% if products %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        {% for product in products %}
+        <div class="col">
+            <div class="card product-card h-100 border-0 shadow-sm" onclick="window.location.href='{{ url_for('products.view', product_id=product.id) }}'">
+                <div class="product-img-container">
+                    {% if product.image_path %}
+                    <img src="{{ url_for('static', filename=product.image_path) }}" alt="{{ product.title }}" class="product-img">
+                    {% else %}
+                    <i class="fas fa-box fa-4x text-muted"></i>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ product.title }}
+                        {% if product.is_free %}
+                        <span class="badge badge-free ms-2">Free</span>
+                        {% endif %}
+                    </h5>
+                    <p class="card-text text-muted">{{ product.description|truncate(100) }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="product-price {% if product.is_free %}free{% endif %}">
+                            {% if product.is_free %}
+                                Free
+                            {% else %}
+                                ${{ "%.2f"|format(product.price) }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    {% if product.has_external_url %}
+                        <a href="{{ product.external_url }}" target="_blank" class="btn btn-outline-primary" onclick="event.stopPropagation();">
+                            <i class="fas fa-external-link-alt me-1"></i> Visit Website
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('products.checkout', product_id=product.id) }}" class="btn btn-primary" onclick="event.stopPropagation();">
+                            {% if product.is_free %}
+                                <i class="fas fa-download me-1"></i> Get Free
+                            {% else %}
+                                <i class="fas fa-shopping-cart me-1"></i> Buy Now
+                            {% endif %}
+                        </a>
+                        <a href="{{ url_for('products.view', product_id=product.id) }}" class="btn btn-outline-secondary ms-2" onclick="event.stopPropagation();">
+                            <i class="fas fa-info-circle me-1"></i> Details
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No products available at the moment. Please check back soon!
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

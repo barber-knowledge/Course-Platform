@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ product.meta_title or product.title }}{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="{{ product.meta_description }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Banner Section -->
+    <div class="jumbotron jumbotron-fluid bg-primary text-white mb-0" style="background-image: url('{{ product.banner_image }}'); background-size: cover; background-position: center;">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 class="display-4">{{ product.banner_text or product.title }}</h1>
+                    <p class="lead">{{ product.description }}</p>
+                    <div class="mt-4">
+                        {% if product.external_url %}
+                            <a href="{{ product.external_url }}" target="_blank" class="btn btn-light btn-lg">Learn More</a>
+                            <a href="{{ product.external_url }}" target="_blank" class="btn btn-outline-light btn-lg ml-2">Buy Now</a>
+                        {% else %}
+                            <a href="{{ url_for('products.view', product_id=product.id) }}" class="btn btn-light btn-lg">Learn More</a>
+                            <a href="{{ url_for('products.purchase', product_id=product.id) }}" class="btn btn-outline-light btn-lg ml-2">Buy Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if product.promo_video_url %}
+                <div class="col-md-4">
+                    <div class="embed-responsive embed-responsive-16by9 shadow">
+                        <iframe class="embed-responsive-item" src="{{ product.promo_video_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Section -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="mb-4">About This Product</h2>
+                <div class="mb-5">
+                    {{ product.detailed_description | safe }}
+                </div>
+
+                {% if product.benefits %}
+                <h3 class="mb-3">Product Benefits</h3>
+                <div class="row mb-5">
+                    {% set benefits = product.benefits|tojson|safe|from_json %}
+                    {% for benefit in benefits %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="mr-2"><i class="fas fa-check-circle text-success"></i></div>
+                            <div>{{ benefit }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Product Details</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><strong>Price:</strong> ${{ product.price }}</li>
+                        </ul>
+                        <div class="text-center mt-4">
+                            {% if product.external_url %}
+                                <a href="{{ product.external_url }}" target="_blank" class="btn btn-primary btn-lg btn-block">Buy Now</a>
+                            {% else %}
+                                <a href="{{ url_for('products.purchase', product_id=product.id) }}" class="btn btn-primary btn-lg btn-block">Buy Now</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if product.image_path %}
+                <div class="card shadow">
+                    <img src="{{ url_for('static', filename='uploads/products/' + product.image_path) }}" class="card-img-top" alt="{{ product.title }}">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    {% if product.faq %}
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+            <div class="accordion" id="faqAccordion">
+                {% set faqs = product.faq|tojson|safe|from_json %}
+                {% for faq in faqs %}
+                <div class="card mb-2">
+                    <div class="card-header" id="heading{{ loop.index }}">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{ loop.index }}" aria-expanded="{{ 'true' if loop.first else 'false' }}" aria-controls="collapse{{ loop.index }}">
+                                {{ faq.question }}
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse{{ loop.index }}" class="collapse {{ 'show' if loop.first else '' }}" aria-labelledby="heading{{ loop.index }}" data-parent="#faqAccordion">
+                        <div class="card-body">
+                            {{ faq.answer }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <div class="container py-5 text-center">
+        <h2>Ready to get started?</h2>
+        <p class="lead">Take your experience to the next level!</p>
+        {% if product.external_url %}
+            <a href="{{ product.external_url }}" target="_blank" class="btn btn-primary btn-lg">Buy Now</a>
+        {% else %}
+            <a href="{{ url_for('products.purchase', product_id=product.id) }}" class="btn btn-primary btn-lg">Buy Now</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Convert JSON strings to objects if needed
+        try {
+            if (typeof benefits === 'string') {
+                benefits = JSON.parse(benefits);
+            }
+            if (typeof faqs === 'string') {
+                faqs = JSON.parse(faqs);
+            }
+        } catch (e) {
+            console.error('Error parsing JSON:', e);
+        }
+    });
+</script>
+{% endblock %}

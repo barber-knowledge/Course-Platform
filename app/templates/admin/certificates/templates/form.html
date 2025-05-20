@@ -1,0 +1,297 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .color-preview {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+        border: 1px solid #ccc;
+    }
+    
+    .custom-file-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .preview-wrapper {
+        position: relative;
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .image-preview {
+        max-width: 80%;
+        max-height: 150px;
+        border: 1px solid #ddd;
+        padding: 5px;
+        background: white;
+    }
+    
+    .remove-btn {
+        position: absolute;
+        top: -10px;
+        right: 10%;
+        background-color: #dc3545;
+        border-radius: 50%;
+        color: white;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        line-height: 25px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">{{ title }}</h1>
+        <a href="{{ url_for('admin.certificate_templates') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Templates
+        </a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-certificate me-1"></i>
+            Template Details
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Template Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ form.name.data or '' }}" required>
+                            <small class="text-muted">A descriptive name for this certificate template</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2">{{ form.description.data or '' }}</textarea>
+                            <small class="text-muted">Optional description of when to use this template</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label for="certificate_title" class="form-label">Certificate Title *</label>
+                            <input type="text" class="form-control" id="certificate_title" name="certificate_title" 
+                                   value="{{ form.certificate_title.data or 'CERTIFICATE OF COMPLETION' }}" required>
+                            <small class="text-muted">The main title displayed on the certificate</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="certificate_text" class="form-label">Certificate Text</label>
+                            <textarea class="form-control" id="certificate_text" name="certificate_text" rows="2">{{ form.certificate_text.data or 'has successfully completed the course' }}</textarea>
+                            <small class="text-muted">The text that appears between the student name and the course title</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="footer_text" class="form-label">Footer Text</label>
+                            <textarea class="form-control" id="footer_text" name="footer_text" rows="2">{{ form.footer_text.data or '' }}</textarea>
+                            <small class="text-muted">Optional text that appears at the bottom of the certificate</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="instructor_name" class="form-label">Instructor Name</label>
+                            <input type="text" class="form-control" id="instructor_name" name="instructor_name" 
+                                   value="{{ form.instructor_name.data or 'Course Instructor' }}">
+                            <small class="text-muted">The name that appears under the signature</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="font" class="form-label">Primary Font</label>
+                            <select class="form-control" id="font" name="font">
+                                {% for value, label in form.font.choices %}
+                                <option value="{{ value }}" {% if form.font.data == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">The primary font used for the certificate text</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="background_color" class="form-label">Background Color</label>
+                            <div class="input-group">
+                                <span class="input-group-text p-0">
+                                    <span class="color-preview" id="bg-color-preview" style="background-color: {{ form.background_color.data or '#FFFFFF' }}"></span>
+                                </span>
+                                <input type="text" class="form-control" id="background_color" name="background_color" 
+                                       value="{{ form.background_color.data or '#FFFFFF' }}">
+                            </div>
+                            <small class="text-muted">The background color of the certificate</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="border_color" class="form-label">Border Color</label>
+                            <div class="input-group">
+                                <span class="input-group-text p-0">
+                                    <span class="color-preview" id="border-color-preview" style="background-color: {{ form.border_color.data or '#294767' }}"></span>
+                                </span>
+                                <input type="text" class="form-control" id="border_color" name="border_color" 
+                                       value="{{ form.border_color.data or '#294767' }}">
+                            </div>
+                            <small class="text-muted">The border color of the certificate</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="text_color" class="form-label">Text Color</label>
+                            <div class="input-group">
+                                <span class="input-group-text p-0">
+                                    <span class="color-preview" id="text-color-preview" style="background-color: {{ form.text_color.data or '#000000' }}"></span>
+                                </span>
+                                <input type="text" class="form-control" id="text_color" name="text_color" 
+                                       value="{{ form.text_color.data or '#000000' }}">
+                            </div>
+                            <small class="text-muted">The color of the text on the certificate</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="logo" class="form-label">Certificate Logo</label>
+                            <input type="file" class="form-control" id="logo" name="logo" accept="image/jpeg,image/png,image/jpg">
+                            <small class="text-muted">Optional logo to display at the top of the certificate (recommended size: 300x150px)</small>
+                            
+                            {% if template and template.logo_path %}
+                            <div class="preview-wrapper" id="logo-preview-container">
+                                <img src="{{ url_for('static', filename=template.logo_path) }}" alt="Logo Preview" class="image-preview">
+                                <span class="remove-btn" id="remove-logo">×</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="signature" class="form-label">Signature Image</label>
+                            <input type="file" class="form-control" id="signature" name="signature" accept="image/jpeg,image/png,image/jpg">
+                            <small class="text-muted">Optional signature image to display on the certificate (recommended size: 200x100px)</small>
+                            
+                            {% if template and template.signature_path %}
+                            <div class="preview-wrapper" id="signature-preview-container">
+                                <img src="{{ url_for('static', filename=template.signature_path) }}" alt="Signature Preview" class="image-preview">
+                                <span class="remove-btn" id="remove-signature">×</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="is_default" name="is_default" 
+                           {% if form.is_default.data %}checked{% endif %}>
+                    <label class="form-check-label" for="is_default">
+                        Set as Default Template
+                    </label>
+                    <small class="form-text text-muted d-block">
+                        When checked, this template will be used for all courses that don't have a specific template selected
+                    </small>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('admin.certificate_templates') }}" class="btn btn-secondary">Cancel</a>
+                    {% if template %}
+                        <a href="{{ url_for('admin.preview_certificate_template', template_id=template.id) }}" 
+                           class="btn btn-info" target="_blank">
+                            <i class="fas fa-eye me-1"></i> Preview Template
+                        </a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> {{ form.submit.label.text }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update color previews when inputs change
+    document.addEventListener('DOMContentLoaded', function() {
+        const bgColorInput = document.getElementById('background_color');
+        const borderColorInput = document.getElementById('border_color');
+        const textColorInput = document.getElementById('text_color');
+        
+        const bgColorPreview = document.getElementById('bg-color-preview');
+        const borderColorPreview = document.getElementById('border-color-preview');
+        const textColorPreview = document.getElementById('text-color-preview');
+        
+        bgColorInput.addEventListener('input', function() {
+            bgColorPreview.style.backgroundColor = this.value;
+        });
+        
+        borderColorInput.addEventListener('input', function() {
+            borderColorPreview.style.backgroundColor = this.value;
+        });
+        
+        textColorInput.addEventListener('input', function() {
+            textColorPreview.style.backgroundColor = this.value;
+        });
+        
+        // Handle remove buttons for logo and signature
+        const removeLogo = document.getElementById('remove-logo');
+        const removeSignature = document.getElementById('remove-signature');
+        
+        if (removeLogo) {
+            removeLogo.addEventListener('click', function() {
+                const logoPreviewContainer = document.getElementById('logo-preview-container');
+                logoPreviewContainer.style.display = 'none';
+                
+                // Add a hidden input to indicate that the logo should be removed
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'remove_logo';
+                hiddenInput.value = 'true';
+                document.querySelector('form').appendChild(hiddenInput);
+            });
+        }
+        
+        if (removeSignature) {
+            removeSignature.addEventListener('click', function() {
+                const sigPreviewContainer = document.getElementById('signature-preview-container');
+                sigPreviewContainer.style.display = 'none';
+                
+                // Add a hidden input to indicate that the signature should be removed
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'remove_signature';
+                hiddenInput.value = 'true';
+                document.querySelector('form').appendChild(hiddenInput);
+            });
+        }
+    });
+</script>
+{% endblock %}

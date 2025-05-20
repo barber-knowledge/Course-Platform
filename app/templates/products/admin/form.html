@@ -1,0 +1,742 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {% if product %}Edit Product{% else %}Add New Product{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        {% if product %}Edit Product: {{ product.title }}{% else %}Add New Product{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="productForm" action="{% if product %}{{ url_for('products.edit_product', product_id=product.id) }}{% else %}{{ url_for('products.new_product') }}{% endif %}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-info" type="button" role="tab" aria-controls="basic-info" aria-selected="true">Basic Info</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="marketing-tab" data-bs-toggle="tab" data-bs-target="#marketing-info" type="button" role="tab" aria-controls="marketing-info" aria-selected="false">Marketing</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="benefits-tab" data-bs-toggle="tab" data-bs-target="#benefits-info" type="button" role="tab" aria-controls="benefits-info" aria-selected="false">Benefits</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="faq-tab" data-bs-toggle="tab" data-bs-target="#faq-info" type="button" role="tab" aria-controls="faq-info" aria-selected="false">FAQ</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo-info" type="button" role="tab" aria-controls="seo-info" aria-selected="false">SEO & CTA</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-info" type="button" role="tab" aria-controls="advanced-info" aria-selected="false">Advanced</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-info" type="button" role="tab" aria-controls="gallery-info" aria-selected="false">Gallery</button>
+                            </li>
+
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="landing-tab" data-bs-toggle="tab" data-bs-target="#landing-info" type="button" role="tab" aria-controls="landing-info" aria-selected="false">Landing Page</button>
+                            </li>
+                        </ul>
+
+                        <!-- Status message area -->
+                        <div class="alert alert-info d-none" id="formStatus">
+                            Field validation in progress...
+                        </div>
+
+                        <div class="tab-content" id="productTabsContent">
+                            <!-- Basic Info Tab -->
+                            <div class="tab-pane fade show active" id="basic-info" role="tabpanel" aria-labelledby="basic-tab">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Product Title <span class="text-danger">*</span></label>
+                                    <input type="text" id="title" name="title" class="form-control" required
+                                           value="{{ product.title if product else '' }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea id="description" name="description" class="form-control" rows="4">{{ product.description if product else '' }}</textarea>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="price" class="form-label">Price <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required
+                                                   value="{{ '%.2f'|format(product.price) if product else '0.00' }}">
+                                        </div>
+                                        <small class="text-muted">Set to 0.00 for free products</small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="external_url" class="form-label">External URL</label>
+                                    <input type="url" id="external_url" name="external_url" class="form-control"
+                                           value="{{ product.external_url if product else '' }}">
+                                    <small class="text-muted">For free products, users will be redirected to this URL</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="product_image" class="form-label">Product Image</label>
+                                    <input type="file" id="product_image" name="product_image" class="form-control" accept="image/png, image/jpeg, image/jpg">
+                                    {% if product and product.image_path %}
+                                        <div class="mt-2">
+                                            <p>Current image:</p>
+                                            <img src="{{ url_for('static', filename=product.image_path) }}" alt="{{ product.title }}" class="img-thumbnail" style="max-height: 150px;">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="is_featured" name="is_featured" class="form-check-input" 
+                                              {% if product and product.is_featured %}checked{% endif %}>
+                                        <label for="is_featured" class="form-check-label">Feature this product</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="slug" class="form-label">Custom URL Slug</label>
+                                    <input type="text" id="slug" name="slug" class="form-control"
+                                           value="{{ product.slug if product else '' }}">
+                                    <small class="text-muted">Leave blank to auto-generate from title</small>
+                                </div>
+                            </div>
+
+                            <!-- Marketing Tab -->
+                            <div class="tab-pane fade" id="marketing-info" role="tabpanel" aria-labelledby="marketing-tab">
+                                <div class="mb-3">
+                                    <label for="usp" class="form-label">Unique Selling Proposition</label>
+                                    <textarea id="usp" name="usp" class="form-control" rows="3">{{ product.usp if product else '' }}</textarea>
+                                    <small class="text-muted">What makes this product stand out from the competition?</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="customer_avatars" class="form-label">Customer Avatars</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="customer_avatars" name="customer_avatars" class="form-control json-field" rows="4">{{ product.customer_avatars if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="customer_avatars" data-template='[{"name":"Target Customer","description":"Description of ideal customer","pain_points":["Pain point 1","Pain point 2"]}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"name": "Busy Professional", "description": "35-45 years old, needs quick solutions", "pain_points": ["Limited time", "Needs results"]}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="testimonials" class="form-label">Testimonials</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="testimonials" name="testimonials" class="form-control json-field" rows="5">{{ product.testimonials if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="testimonials" data-template='[{"name":"John Doe","role":"CEO","text":"Great product!"}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"name": "John Doe", "role": "CEO", "text": "Great product!"}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="features" class="form-label">Product Features</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="features" name="features" class="form-control json-field" rows="5">{{ product.features if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="features" data-template='[{"title":"Feature 1","description":"Details about this feature"}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"title": "Feature 1", "description": "Details..."}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="before_after" class="form-label">Before/After Scenarios</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="before_after" name="before_after" class="form-control json-field" rows="4">{{ product.before_after if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="before_after" data-template='[{"before":"Problem description","after":"Solution result"}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"before": "Problem description", "after": "Solution result"}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="guarantee_text" class="form-label">Guarantee Text</label>
+                                    <textarea id="guarantee_text" name="guarantee_text" class="form-control" rows="3">{{ product.guarantee_text if product else '' }}</textarea>
+                                    <small class="text-muted">Describe your money-back or satisfaction guarantee</small>
+                                </div>
+                            </div>
+
+                            <!-- Benefits Tab -->
+                            <div class="tab-pane fade" id="benefits-info" role="tabpanel" aria-labelledby="benefits-tab">
+                                <div class="mb-3">
+                                    <h5>Product Benefits</h5>
+                                    <p class="text-muted">List the key benefits customers will receive from your product</p>
+                                    
+                                    <div id="benefits-container">
+                                        <input type="hidden" id="benefits" name="benefits" value="{{ product.benefits if product else '[]' }}">
+                                        
+                                        <div class="benefits-list">
+                                            <!-- Benefits will be added here dynamically -->
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-sm btn-success" id="add-benefit-btn">
+                                                <i class="fas fa-plus"></i> Add Benefit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FAQ Tab -->
+                            <div class="tab-pane fade" id="faq-info" role="tabpanel" aria-labelledby="faq-tab">
+                                <div class="mb-3">
+                                    <h5>Frequently Asked Questions</h5>
+                                    <p class="text-muted">Add questions and answers your customers might have</p>
+                                    
+                                    <div id="faq-container">
+                                        <input type="hidden" id="faq" name="faq" value="{{ product.faq if product else '[]' }}">
+                                        
+                                        <div class="faq-list">
+                                            <!-- FAQs will be added here dynamically -->
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-sm btn-success" id="add-faq-btn">
+                                                <i class="fas fa-plus"></i> Add Question
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEO & CTA Tab -->
+                            <div class="tab-pane fade" id="seo-info" role="tabpanel" aria-labelledby="seo-tab">
+                                <div class="mb-3">
+                                    <label for="meta_title" class="form-label">Meta Title</label>
+                                    <input type="text" id="meta_title" name="meta_title" class="form-control"
+                                           value="{{ product.meta_title if product else '' }}">
+                                    <small class="text-muted">Title shown in search engine results (55-60 characters ideal)</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="meta_description" class="form-label">Meta Description</label>
+                                    <textarea id="meta_description" name="meta_description" class="form-control" rows="3">{{ product.meta_description if product else '' }}</textarea>
+                                    <small class="text-muted">Description shown in search engine results (150-160 characters ideal)</small>
+                                    <div class="mt-1">
+                                        <span id="meta_description_count" class="text-muted">0/160</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="seo_keywords" class="form-label">SEO Keywords</label>
+                                    <input type="text" id="seo_keywords" name="seo_keywords" class="form-control"
+                                           value="{{ product.seo_keywords if product else '' }}">
+                                    <small class="text-muted">Comma-separated keywords</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cta_primary_text" class="form-label">Primary Call-to-Action Text</label>
+                                    <input type="text" id="cta_primary_text" name="cta_primary_text" class="form-control"
+                                           value="{{ product.cta_primary_text if product else 'Buy Now' }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cta_secondary_text" class="form-label">Secondary Call-to-Action Text</label>
+                                    <input type="text" id="cta_secondary_text" name="cta_secondary_text" class="form-control"
+                                           value="{{ product.cta_secondary_text if product else 'Learn More' }}">
+                                </div>
+                            </div>
+
+                            <!-- Advanced Tab -->
+                            <div class="tab-pane fade" id="advanced-info" role="tabpanel" aria-labelledby="advanced-tab">
+                                <div class="mb-3">
+                                    <label for="product_comparison" class="form-label">Product Comparison</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="product_comparison" name="product_comparison" class="form-control json-field" rows="4">{{ product.product_comparison if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="product_comparison" data-template='[{"competitor":"Product X","advantages":["Better quality","Lower price"]}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"competitor": "Product X", "advantages": ["Better quality", "Lower price"]}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="limited_offer" class="form-label">Limited Offer Details</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="limited_offer" name="limited_offer" class="form-control json-field" rows="3">{{ product.limited_offer if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="limited_offer" data-template='{"end_date":"2025-12-31","discount":20,"reason":"Holiday Special"}'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: {"end_date": "2025-12-31", "discount": 20, "reason": "Holiday Special"}</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="social_proof" class="form-label">Social Proof</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="social_proof" name="social_proof" class="form-control json-field" rows="3">{{ product.social_proof if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="social_proof" data-template='[{"type":"statistic","text":"5000+ satisfied customers"},{"type":"award","text":"Best Product 2025"}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"type": "statistic", "text": "5000+ satisfied customers"}, {"type": "award", "text": "Best Product 2025"}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="author_bio" class="form-label">Author/Creator Bio</label>
+                                    <textarea id="author_bio" name="author_bio" class="form-control" rows="4">{{ product.author_bio if product else '' }}</textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="technical_specs" class="form-label">Technical Specifications</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="technical_specs" name="technical_specs" class="form-control json-field" rows="4">{{ product.technical_specs if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="technical_specs" data-template='[{"name":"Dimension","value":"10x20x30cm"}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"name": "Dimension", "value": "10x20x30cm"}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="related_products" class="form-label">Related Products (IDs)</label>
+                                    <input type="text" id="related_products" name="related_products" class="form-control"
+                                           value="{{ product.related_products if product else '' }}">
+                                    <small class="text-muted">Comma-separated product IDs</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="download_link" class="form-label">Download Link</label>
+                                    <input type="url" id="download_link" name="download_link" class="form-control"
+                                           value="{{ product.download_link if product else '' }}">
+                                    <small class="text-muted">For digital products with direct download links</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="pricing_tiers" class="form-label">Pricing Tiers</label>
+                                    <div class="json-editor-container">
+                                        <textarea id="pricing_tiers" name="pricing_tiers" class="form-control json-field" rows="4">{{ product.pricing_tiers if product else '' }}</textarea>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 json-editor-btn" data-field="pricing_tiers" data-template='[{"name":"Basic","price":19.99,"features":["Feature 1","Feature 2"]},{"name":"Premium","price":49.99,"features":["Feature 1","Feature 2","Feature 3"]}]'>
+                                            <i class="fas fa-code"></i> Format JSON
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Format: [{"name": "Basic", "price": 19.99, "features": ["Feature 1", "Feature 2"]}]</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="popup_id" class="form-label">Popup ID</label>
+                                    <input type="text" id="popup_id" name="popup_id" class="form-control"
+                                           value="{{ product.popup_id if product else '' }}">
+                                    <small class="text-muted">ID of the popup to display on this product page</small>
+                                </div>
+                            </div>
+
+                            <!-- Gallery Tab -->
+                            <div class="tab-pane fade" id="gallery-info" role="tabpanel" aria-labelledby="gallery-tab">
+                                <div class="mb-3">
+                                    <h5>Product Gallery</h5>
+                                    <p class="text-muted">Add multiple images to showcase your product</p>
+                                    
+                                    <div id="gallery-container">
+                                        <input type="hidden" id="gallery_images" name="gallery_images" value="{{ product.gallery_images if product else '[]' }}">
+                                        
+                                        <div class="row gallery-preview mb-3">
+                                            <!-- Gallery images will be shown here -->
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="gallery_upload" class="form-label">Upload Images</label>
+                                            <input type="file" id="gallery_upload" class="form-control" accept="image/png, image/jpeg, image/jpg" multiple>
+                                            <small class="text-muted">You can select multiple images at once</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Landing Page Tab -->
+                            <div class="tab-pane fade" id="landing-info" role="tabpanel" aria-labelledby="landing-tab">
+                                <div class="mb-3">
+                                    <label for="banner_text" class="form-label">Banner Text</label>
+                                    <input type="text" id="banner_text" name="banner_text" class="form-control"
+                                           value="{{ product.banner_text if product else '' }}">
+                                    <small class="text-muted">Large text shown at the top of the landing page</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="banner_image" class="form-label">Banner Image</label>
+                                    <input type="file" id="banner_image" name="banner_image" class="form-control" accept="image/png, image/jpeg, image/jpg">
+                                    {% if product and product.banner_image %}
+                                        <div class="mt-2">
+                                            <p>Current banner image:</p>
+                                            <img src="{{ url_for('static', filename=product.banner_image) }}" alt="Banner" class="img-thumbnail" style="max-width: 300px;">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="detailed_description" class="form-label">Detailed Description</label>
+                                    <textarea id="detailed_description" name="detailed_description" class="form-control" rows="6">{{ product.detailed_description if product else '' }}</textarea>
+                                    <small class="text-muted">HTML is supported for formatting</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="promo_video_url" class="form-label">Promotional Video URL</label>
+                                    <input type="url" id="promo_video_url" name="promo_video_url" class="form-control"
+                                           value="{{ product.promo_video_url if product else '' }}">
+                                    <small class="text-muted">YouTube or Vimeo URL</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('products.admin_products') }}'">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitButton">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Meta description counter
+        const metaDesc = document.getElementById('meta_description');
+        const metaDescCount = document.getElementById('meta_description_count');
+        
+        if (metaDesc && metaDescCount) {
+            updateCharCount(metaDesc, metaDescCount);
+            metaDesc.addEventListener('input', function() {
+                updateCharCount(metaDesc, metaDescCount);
+            });
+        }
+        
+        // JSON field formatting
+        const jsonEditorBtns = document.querySelectorAll('.json-editor-btn');
+        jsonEditorBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const fieldId = this.dataset.field;
+                const fieldElement = document.getElementById(fieldId);
+                const template = this.dataset.template;
+                
+                try {
+                    // If field already has content, try to format it
+                    if (fieldElement.value.trim()) {
+                        const parsedJson = JSON.parse(fieldElement.value);
+                        fieldElement.value = JSON.stringify(parsedJson, null, 2);
+                    } else {
+                        // If empty, use the template
+                        fieldElement.value = JSON.stringify(JSON.parse(template), null, 2);
+                    }
+                    showFormStatus('JSON formatted successfully', 'success');
+                } catch (e) {
+                    showFormStatus('Invalid JSON format. Template applied.', 'warning');
+                    fieldElement.value = JSON.stringify(JSON.parse(template), null, 2);
+                }
+            });
+        });
+        
+        // Benefits dynamic fields
+        initBenefits();
+        
+        // FAQ dynamic fields
+        initFAQ();
+        
+        // Form validation before submission
+        const productForm = document.getElementById('productForm');
+        if (productForm) {
+            productForm.addEventListener('submit', function(e) {
+                // Validate JSON fields
+                const jsonFields = document.querySelectorAll('.json-field');
+                let hasError = false;
+                
+                jsonFields.forEach(field => {
+                    if (field.value.trim()) {
+                        try {
+                            JSON.parse(field.value);
+                        } catch (e) {
+                            e.preventDefault();
+                            hasError = true;
+                            field.classList.add('is-invalid');
+                            showFormStatus(`Invalid JSON in ${field.id} field`, 'danger');
+                            
+                            // Focus on the tab with the error
+                            const tabPane = field.closest('.tab-pane');
+                            const tabId = tabPane.id;
+                            const tab = document.querySelector(`[data-bs-target="#${tabId}"]`);
+                            if (tab) {
+                                tab.click();
+                            }
+                        }
+                    }
+                });
+                
+                if (hasError) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Update benefits and FAQ hidden fields
+                updateBenefitsField();
+                updateFAQField();
+                
+                showFormStatus('Saving product...', 'info');
+                return true;
+            });
+        }
+    });
+    
+    // Character counter for meta description
+    function updateCharCount(inputElem, countElem) {
+        const length = inputElem.value.length;
+        countElem.textContent = `${length}/160`;
+        
+        if (length > 160) {
+            countElem.classList.add('text-danger');
+        } else {
+            countElem.classList.remove('text-danger');
+        }
+    }
+    
+    // Show form status message
+    function showFormStatus(message, type) {
+        const statusElem = document.getElementById('formStatus');
+        statusElem.textContent = message;
+        statusElem.className = `alert alert-${type}`;
+        
+        // Show the message
+        statusElem.classList.remove('d-none');
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            statusElem.classList.add('d-none');
+        }, 3000);
+    }
+    
+    // Initialize benefits dynamic fields
+    function initBenefits() {
+        const benefitsContainer = document.getElementById('benefits-container');
+        const benefitsField = document.getElementById('benefits');
+        const benefitsList = document.querySelector('.benefits-list');
+        const addBenefitBtn = document.getElementById('add-benefit-btn');
+        
+        if (!benefitsContainer || !benefitsField || !benefitsList || !addBenefitBtn) return;
+        
+        // Load existing benefits
+        let benefits = [];
+        try {
+            benefits = JSON.parse(benefitsField.value);
+        } catch (e) {
+            benefits = [];
+        }
+        
+        // Render benefits
+        renderBenefits();
+        
+        // Add button event
+        addBenefitBtn.addEventListener('click', function() {
+            benefits.push({
+                "title": "New Benefit",
+                "description": "Describe this benefit"
+            });
+            renderBenefits();
+            updateBenefitsField();
+        });
+        
+        function renderBenefits() {
+            benefitsList.innerHTML = '';
+            
+            if (benefits.length === 0) {
+                benefitsList.innerHTML = '<p class="text-muted">No benefits added yet. Click "Add Benefit" to start.</p>';
+                return;
+            }
+            
+            benefits.forEach((benefit, index) => {
+                const benefitCard = document.createElement('div');
+                benefitCard.className = 'card mb-3';
+                benefitCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Benefit Title</label>
+                            <input type="text" class="form-control benefit-title" data-index="${index}" value="${benefit.title || ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Benefit Description</label>
+                            <textarea class="form-control benefit-description" data-index="${index}" rows="2">${benefit.description || ''}</textarea>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-benefit" data-index="${index}">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                `;
+                benefitsList.appendChild(benefitCard);
+            });
+            
+            // Add event listeners to new fields
+            document.querySelectorAll('.benefit-title').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    benefits[index].title = this.value;
+                    updateBenefitsField();
+                });
+            });
+            
+            document.querySelectorAll('.benefit-description').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    benefits[index].description = this.value;
+                    updateBenefitsField();
+                });
+            });
+            
+            document.querySelectorAll('.remove-benefit').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    benefits.splice(index, 1);
+                    renderBenefits();
+                    updateBenefitsField();
+                });
+            });
+        }
+        
+        function updateBenefitsField() {
+            benefitsField.value = JSON.stringify(benefits);
+        }
+    }
+    
+    // Update benefits hidden field
+    function updateBenefitsField() {
+        const benefitsField = document.getElementById('benefits');
+        const benefits = [];
+        
+        document.querySelectorAll('.benefit-title').forEach((input, index) => {
+            if (!benefits[index]) benefits[index] = {};
+            benefits[index].title = input.value;
+        });
+        
+        document.querySelectorAll('.benefit-description').forEach((textarea, index) => {
+            if (!benefits[index]) benefits[index] = {};
+            benefits[index].description = textarea.value;
+        });
+        
+        benefitsField.value = JSON.stringify(benefits);
+    }
+    
+    // Initialize FAQ dynamic fields
+    function initFAQ() {
+        const faqContainer = document.getElementById('faq-container');
+        const faqField = document.getElementById('faq');
+        const faqList = document.querySelector('.faq-list');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        
+        if (!faqContainer || !faqField || !faqList || !addFaqBtn) return;
+        
+        // Load existing FAQs
+        let faqs = [];
+        try {
+            faqs = JSON.parse(faqField.value);
+        } catch (e) {
+            faqs = [];
+        }
+        
+        // Render FAQs
+        renderFAQs();
+        
+        // Add button event
+        addFaqBtn.addEventListener('click', function() {
+            faqs.push({
+                "question": "New Question",
+                "answer": "Answer to the question"
+            });
+            renderFAQs();
+            updateFAQField();
+        });
+        
+        function renderFAQs() {
+            faqList.innerHTML = '';
+            
+            if (faqs.length === 0) {
+                faqList.innerHTML = '<p class="text-muted">No FAQs added yet. Click "Add Question" to start.</p>';
+                return;
+            }
+            
+            faqs.forEach((faq, index) => {
+                const faqCard = document.createElement('div');
+                faqCard.className = 'card mb-3';
+                faqCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Question</label>
+                            <input type="text" class="form-control faq-question" data-index="${index}" value="${faq.question || ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Answer</label>
+                            <textarea class="form-control faq-answer" data-index="${index}" rows="3">${faq.answer || ''}</textarea>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-faq" data-index="${index}">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                `;
+                faqList.appendChild(faqCard);
+            });
+            
+            // Add event listeners to new fields
+            document.querySelectorAll('.faq-question').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    faqs[index].question = this.value;
+                    updateFAQField();
+                });
+            });
+            
+            document.querySelectorAll('.faq-answer').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    faqs[index].answer = this.value;
+                    updateFAQField();
+                });
+            });
+            
+            document.querySelectorAll('.remove-faq').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    faqs.splice(index, 1);
+                    renderFAQs();
+                    updateFAQField();
+                });
+            });
+        }
+        
+        function updateFAQField() {
+            faqField.value = JSON.stringify(faqs);
+        }
+    }
+    
+    // Update FAQ hidden field
+    function updateFAQField() {
+        const faqField = document.getElementById('faq');
+        const faqs = [];
+        
+        document.querySelectorAll('.faq-question').forEach((input, index) => {
+            if (!faqs[index]) faqs[index] = {};
+            faqs[index].question = input.value;
+        });
+        
+        document.querySelectorAll('.faq-answer').forEach((textarea, index) => {
+            if (!faqs[index]) faqs[index] = {};
+            faqs[index].answer = textarea.value;
+        });
+        
+        faqField.value = JSON.stringify(faqs);
+    }
+</script>
+{% endblock %}

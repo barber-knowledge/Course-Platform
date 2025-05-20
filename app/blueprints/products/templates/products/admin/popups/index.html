@@ -1,0 +1,63 @@
+{% extends "admin/index.html" %}
+
+{% block title %}Popup Management{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">Popups</h4>
+            <div>
+                <a href="{{ url_for('products.admin_products') }}" class="btn btn-secondary me-2">Products</a>
+                <a href="{{ url_for('products.new_popup') }}" class="btn btn-primary">Add New Popup</a>
+            </div>
+        </div>
+        
+        {% if popups %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Text</th>
+                        <th>Trigger Time</th>
+                        <th>Button Label</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for popup in popups %}
+                    <tr>
+                        <td>{{ popup.id }}</td>
+                        <td>{{ popup.product.title }}</td>
+                        <td>
+                            {% if popup.popup_image %}
+                            <img src="{{ url_for('static', filename=popup.popup_image) }}" alt="Popup image" width="50">
+                            {% else %}
+                            <span class="text-muted">No image</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ popup.popup_text|truncate(30) if popup.popup_text else 'No text' }}</td>
+                        <td>{{ popup.popup_trigger_seconds }} seconds</td>
+                        <td>{{ popup.popup_button_label }}</td>
+                        <td>
+                            <a href="{{ url_for('products.edit_popup', popup_id=popup.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <form method="POST" action="{{ url_for('products.delete_popup', popup_id=popup.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this popup?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No popups found. Click the "Add New Popup" button to create one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

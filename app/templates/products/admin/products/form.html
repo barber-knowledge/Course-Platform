@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ 'Edit' if product else 'New' }} Product{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="card-title h5 mb-0">{{ 'Edit' if product else 'New' }} Product</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="productForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="title" name="title" 
+                                           value="{{ product.title if product else '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="4">{{ product.description if product else '' }}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Product Image</label>
+                                    <div class="card p-3 text-center mb-3">
+                                        {% if product and product.image_path %}
+                                            <img src="{{ url_for('static', filename=product.image_path) }}" class="img-thumbnail mx-auto mb-2" style="max-height: 150px;" alt="Product Image">
+                                        {% else %}
+                                            <div class="text-muted py-5">
+                                                <i class="fas fa-box fa-3x mb-3"></i>
+                                                <p class="mb-0">No image uploaded</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="image" class="form-label">Upload Image</label>
+                                        <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/gif">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="price" name="price" 
+                                              value="{{ product.price if product else '0.00' }}" step="0.01" min="0" required>
+                                    </div>
+                                    <div class="form-text">
+                                        Set to 0.00 for free products or if using external URL only.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="external_url" class="form-label">External URL</label>
+                                    <input type="url" class="form-control" id="external_url" name="external_url" 
+                                           value="{{ product.external_url if product else '' }}" 
+                                           placeholder="https://example.com/product">
+                                    <div class="form-text">
+                                        For free products or to link to an external sales page.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>How Products Work:</strong>
+                            <ul class="mb-0">
+                                <li>If price is greater than $0, clicking a product popup will create a Stripe checkout session.</li>
+                                <li>If price is $0 and an external URL is provided, clicking a popup will redirect to that URL.</li>
+                                <li>Create popups after saving this product to associate them with videos.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('products.admin_products') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">{{ 'Update' if product else 'Create' }} Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

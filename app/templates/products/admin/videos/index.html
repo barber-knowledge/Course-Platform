@@ -1,0 +1,121 @@
+{% extends 'layout.html' %}
+
+{% block title %}Video Popup Assignments{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Video Popup Assignments</h1>
+        <div>
+            <a href="{{ url_for('products.admin_products') }}" class="btn btn-info me-2">
+                <i class="fas fa-box"></i> Manage Products
+            </a>
+            <a href="{{ url_for('products.admin_popups') }}" class="btn btn-info me-2">
+                <i class="fas fa-comment-alt"></i> Manage Popups
+            </a>
+            <a href="{{ url_for('admin.videos', course_id=videos[0].course_id) if videos else url_for('admin.courses') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Videos
+            </a>
+        </div>
+    </div>
+    
+    {% if videos %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Course</th>
+                        <th style="width: 25%">Video Title</th>
+                        <th style="width: 30%">Current Popup</th>
+                        <th style="width: 20%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for video in videos %}
+                        <tr>
+                            <td>{{ video.course.title }}</td>
+                            <td>{{ video.title }}</td>
+                            <td>
+                                {% if video.popup_id %}
+                                    {% set popup = popups|selectattr('id', 'equalto', video.popup_id)|first %}
+                                    {% if popup %}
+                                        <div class="d-flex align-items-center">
+                                            {% if popup.popup_image %}
+                                                <img src="{{ url_for('static', filename=popup.popup_image) }}" alt="Popup Preview" class="img-thumbnail me-2" style="max-height: 40px;">
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ popup.popup_button_label }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ (popup.popup_trigger_seconds / 60)|int }}:{{ '%02d'|format(popup.popup_trigger_seconds % 60) }} -
+                                                    {% if popup.product %}
+                                                        {{ popup.product.title }}
+                                                    {% else %}
+                                                        Unknown product
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-danger">Popup not found (ID: {{ video.popup_id }})</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">No popup assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignPopupModal{{ video.id }}">
+                                    <i class="fas fa-edit"></i> Assign Popup
+                                </button>
+                                
+                                <!-- Assign Popup Modal -->
+                                <div class="modal fade" id="assignPopupModal{{ video.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Assign Popup to Video</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ url_for('products.set_video_popup', video_id=video.id) }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <div class="modal-body">
+                                                    <h6 class="mb-3">Video: {{ video.title }}</h6>
+                                                    <div class="mb-3">
+                                                        <label for="popup_id{{ video.id }}" class="form-label">Select Popup</label>
+                                                        <select id="popup_id{{ video.id }}" name="popup_id" class="form-select">
+                                                            <option value="">-- No Popup --</option>
+                                                            {% for popup in popups %}
+                                                                <option value="{{ popup.id }}" {% if video.popup_id == popup.id %}selected{% endif %}>
+                                                                    {% if popup.product %}{{ popup.product.title }}{% else %}Unknown product{% endif %} - 
+                                                                    {{ popup.popup_button_label }} 
+                                                                    ({{ (popup.popup_trigger_seconds / 60)|int }}:{{ '%02d'|format(popup.popup_trigger_seconds % 60) }})
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="alert alert-info">
+                                                        <i class="fas fa-info-circle"></i> 
+                                                        The popup will appear at the specified trigger time during video playback.
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Save Assignment</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No videos found in the system. Add videos to courses first.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
