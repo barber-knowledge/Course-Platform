@@ -30,19 +30,19 @@ class Config:
     
     # Database connection details (hardcoded for testing)
     # Hostname / IP: This is the public IP of the database server
-    DB_HOST = '66.179.241.151'
+    DB_HOST = 'courseapp.cxi0cykmat4u.us-east-2.rds.amazonaws.com'
     
     # Port: Default MariaDB/MySQL port
     DB_PORT = 3306
     
     # Database name
-    DB_NAME = 'admin_'
+    DB_NAME = 'courseapp'
     
     # Username to authenticate with
-    DB_USER = 'admin_modularce'
+    DB_USER = 'admin'
     
     # Password for that user
-    DB_PASSWORD = '320eK~lw8'
+    DB_PASSWORD = '3d7j*E%xV*VK#*t787'
     
     # SQLAlchemy URI (MySQL + PyMySQL driver)
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
